@@ -14,32 +14,25 @@ final class ImagesListCell: UITableViewCell {
     // MARK: - Private Properties
     private let gradientLayer = CAGradientLayer()
     
-    // MARK: - Private Methods
-    private func updateGradientFrame() {
-        gradientLayer.frame = gradientView.bounds
-    }
-    
     // MARK: - Public Methods
     override func awakeFromNib() {
         super.awakeFromNib()
         
-        gradientLayer.colors = [
-            try? UIColor(hex: "#1B2200").withAlphaComponent(0).cgColor,
-            try? UIColor(hex: "#1B2200").withAlphaComponent(1).cgColor
-        ].compactMap { $0 }
+        let gradientOverlay = UIImageView(image: UIImage(resource: .gradientOverlayImage))
+        gradientOverlay.translatesAutoresizingMaskIntoConstraints = false
+        gradientOverlay.contentMode = .scaleToFill
+        gradientView.addSubview(gradientOverlay)
         
-        gradientLayer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
-        gradientLayer.cornerRadius = 16
-        gradientLayer.masksToBounds = true
-    }
-    
-    override func layoutSubviews() {
-        super.layoutSubviews()
+        gradientOverlay.layer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
+        gradientOverlay.layer.cornerRadius = 16
+        gradientOverlay.layer.masksToBounds = true
         
-        if gradientLayer.superlayer == nil {
-            gradientView.layer.addSublayer(gradientLayer)
-        }
-        gradientLayer.frame = gradientView.bounds
+        NSLayoutConstraint.activate([
+            gradientOverlay.leadingAnchor.constraint(equalTo: gradientView.leadingAnchor),
+            gradientOverlay.trailingAnchor.constraint(equalTo: gradientView.trailingAnchor),
+            gradientOverlay.topAnchor.constraint(equalTo: gradientView.topAnchor),
+            gradientOverlay.bottomAnchor.constraint(equalTo: gradientView.bottomAnchor)
+        ])
     }
     
     func configure(imageName: String, dateString: String, isLiked: Bool) {
@@ -50,11 +43,8 @@ final class ImagesListCell: UITableViewCell {
         
         cellImage.image = image
         dateLabel.text = dateString
-        let imageState = isLiked == true ? "Active" : "No Active"
-        let buttonImage = UIImage(named: imageState)
+        let buttonImage = isLiked == true ? UIImage(resource: .isLiked) : UIImage(resource: .isNotLiked)
         likeButton.setImage(buttonImage, for: .normal)
-        layoutIfNeeded()
-        updateGradientFrame()
     }
     
 }
