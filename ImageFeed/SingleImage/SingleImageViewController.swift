@@ -3,35 +3,29 @@ import UIKit
 final class SingleImageViewController: UIViewController {
     
     // MARK: - IB Outlets
-    @IBOutlet private var imageView: UIImageView!
-    @IBOutlet private var scrollView: UIScrollView!
+    @IBOutlet private weak var imageView: UIImageView!
+    @IBOutlet private weak var scrollView: UIScrollView!
     
     // MARK: - Public Properties
     var image: UIImage? {
         didSet {
             guard isViewLoaded, let image else { return }
-            
-            imageView.image = image
-            imageView.frame.size = image.size
-            rescaleAndCenterImageInScrollView(image: image)
+            setAndRescaleAndCenterImageInScrollView(image: image)
         }
     }
     
     // MARK: - View Life Cycles
     override func viewDidLoad() {
         super.viewDidLoad()
-        imageView.image = image
         scrollView.minimumZoomScale = 0.1
         scrollView.maximumZoomScale = 1.25
         
         guard let image else { return }
-        imageView.image = image
-        imageView.frame.size = image.size
-        rescaleAndCenterImageInScrollView(image: image)
+        setAndRescaleAndCenterImageInScrollView(image: image)
     }
     
     // MARK: - IB Actions
-    @IBAction private func didTapBackwardButton() {
+    @IBAction private func didTapCloseButton() {
         dismiss(animated: true, completion: nil)
     }
     
@@ -73,6 +67,12 @@ final class SingleImageViewController: UIViewController {
         let y = max(Double.zero, (visibleRectSize.height - contentSize.height) / 2)
         
         scrollView.contentInset = UIEdgeInsets(top: y, left: x, bottom: y, right: x)
+    }
+    
+    private func setAndRescaleAndCenterImageInScrollView(image: UIImage) {
+        imageView.image = image
+        imageView.frame.size = image.size
+        rescaleAndCenterImageInScrollView(image: image)
     }
 }
 
