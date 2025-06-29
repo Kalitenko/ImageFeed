@@ -11,43 +11,37 @@ final class OAuth2Service {
     // MARK: - Private Properties
     private let storage = OAuth2TokenStorage()
     private let urlSession = URLSession.shared
+    private let decoder = SnakeCaseJSONDecoder()
     
     // MARK: - Public Methods
     func fetchOAuthToken(_ code: String, completion: @escaping (Result<String, Error>) -> Void) {
         
         guard let request = makeOAuthTokenRequest(code: code) else {
             print("❌ Ошибка создания запроса", #fileID, #function, #line)
-            DispatchQueue.main.async {
-                completion(.failure(NetworkError.urlSessionError))
-            }
+            completion(.failure(NetworkError.urlSessionError))
             return
         }
         
         urlSession.data(for: request) { [weak self] result in
             switch result {
             case .success(let data):
+                guard let self else { return }
                 do {
-                    let token = try JSONDecoder().decode(OAuthTokenResponseBody.self, from: data)
+                    let token = try self.decoder.decode(OAuthTokenResponseBody.self, from: data)
                     let accessToken = token.accessToken
-                    self?.storage.token = accessToken
+                    self.storage.token = accessToken
                     print("✅ Токен сохранён: \(token)", #fileID, #function, #line)
-                    DispatchQueue.main.async {
-                        completion(.success(accessToken))
-                    }
+                    completion(.success(accessToken))
                 } catch let decodingError {
                     print("❌ Ошибка декодирования ответа: \(decodingError)", #fileID, #function, #line)
-                    DispatchQueue.main.async {
-                        completion(.failure(decodingError))
-                    }
+                    completion(.failure(decodingError))
                 }
             case .failure(let error):
                 print("❌ Сетевая ошибка или ошибка с неподходящим статусом кода ответа: \(error)", #fileID, #function, #line)
-                DispatchQueue.main.async {
-                    completion(.failure(error))
-                }
+                completion(.failure(error))
             }
         }.resume()
-            
+        
     }
     
     // MARK: - Private Methods
@@ -57,13 +51,13 @@ final class OAuth2Service {
             return nil
         }
         guard let url = URL(
-             string: "/oauth/token"
-             + "?client_id=\(Constants.accessKey)"
-             + "&&client_secret=\(Constants.secretKey)"
-             + "&&redirect_uri=\(Constants.redirectURI)"
-             + "&&code=\(code)"
-             + "&&grant_type=authorization_code",
-             relativeTo: baseURL
+            string: "/oauth/token"
+            + "?client_id=\(Constants.accessKey)"
+            + "&&client_secret=\(Constants.secretKey)"
+            + "&&redirect_uri=\(Constants.redirectURI)"
+            + "&&code=\(code)"
+            + "&&grant_type=authorization_code",
+            relativeTo: baseURL
         ) else {
             print("❌ Ошибка при создании URL для запроса токена", #fileID, #function, #line)
             return nil
@@ -71,5 +65,5 @@ final class OAuth2Service {
         var request = URLRequest(url: url)
         request.setMethod(.post)
         return request
-     }
+    }
 }

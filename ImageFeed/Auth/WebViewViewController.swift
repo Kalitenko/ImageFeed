@@ -4,7 +4,7 @@ import WebKit
 final class WebViewViewController: UIViewController {
     
     // MARK: - IB Outlets
-    @IBOutlet var webView: WKWebView!
+    @IBOutlet private var webView: WKWebView!
     @IBOutlet private var progressView: UIProgressView!
     
     // MARK: - Public Properties
@@ -46,7 +46,7 @@ final class WebViewViewController: UIViewController {
             super.observeValue(forKeyPath: keyPath, of: object, change: change, context: context)
         }
     }
-
+    
     // MARK: - Private Methods
     private func updateProgress() {
         progressView.progress = Float(webView.estimatedProgress)
@@ -84,12 +84,12 @@ extension WebViewViewController: WKNavigationDelegate {
         decidePolicyFor navigationAction: WKNavigationAction,
         decisionHandler: @escaping (WKNavigationActionPolicy) -> Void
     ) {
-         if let code = code(from: navigationAction) {
-             delegate?.webViewViewController(self, didAuthenticateWithCode: code)
-                decisionHandler(.cancel)
-          } else {
-                decisionHandler(.allow)
-            }
+        if let code = code(from: navigationAction) {
+            delegate?.webViewViewController(self, didAuthenticateWithCode: code)
+            decisionHandler(.cancel)
+        } else {
+            decisionHandler(.allow)
+        }
     }
     
     private func code(from navigationAction: WKNavigationAction) -> String? {

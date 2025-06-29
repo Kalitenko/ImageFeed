@@ -48,7 +48,7 @@ extension AuthViewController: WebViewViewControllerDelegate {
             guard let self else { return }
             print("👀 \(result)\n", #fileID, #function, #line)
             switch result {
-            case .success(let token):
+            case .success(_):
                 print("✅ Авторизация выполнена", #fileID, #function, #line)
                 self.delegate?.didAuthenticate(self)
             case .failure(let error):
@@ -61,4 +61,4 @@ extension AuthViewController: WebViewViewControllerDelegate {
         vc.dismiss(animated: true)
     }
 }
-    
+

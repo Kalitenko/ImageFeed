@@ -27,19 +27,19 @@ final class SplashViewController: UIViewController {
         NSLayoutConstraint.activate([
             logoImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             logoImageView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            ])
+        ])
     }
     
     // MARK:- Logic
     // MARK: - Private Properties
     private let tokenStorage = OAuth2TokenStorage()
     private let showAuthenticationScreenSegueIdentifier = "ShowAuthenticationScreen"
-
+    
     // MARK: - Lifecycle Logic
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-
-        if let token = tokenStorage.token {
+        
+        if tokenStorage.token != nil {
             switchToTabBarController()
         } else {
             performSegue(withIdentifier: showAuthenticationScreenSegueIdentifier, sender: nil)
@@ -52,7 +52,10 @@ final class SplashViewController: UIViewController {
             guard
                 let navigationController = segue.destination as? UINavigationController,
                 let viewController = navigationController.viewControllers[0] as? AuthViewController
-            else { fatalError("Failed to prepare for \(showAuthenticationScreenSegueIdentifier)") }
+            else {
+                assertionFailure("Failed to prepare for \(showAuthenticationScreenSegueIdentifier)")
+                return
+            }
             viewController.delegate = self
         } else {
             super.prepare(for: segue, sender: sender)
@@ -61,7 +64,11 @@ final class SplashViewController: UIViewController {
     
     // MARK: - Private Methods
     private func switchToTabBarController() {
-        guard let window = UIApplication.shared.windows.first else { fatalError("Invalid Configuration") }
+        guard let window = UIApplication.shared.windows.first
+        else {
+            assertionFailure("Invalid Configuration")
+            return
+        }
         let tabBarController = UIStoryboard(name: "Main", bundle: .main)
             .instantiateViewController(withIdentifier: "TabBarViewController")
         window.rootViewController = tabBarController

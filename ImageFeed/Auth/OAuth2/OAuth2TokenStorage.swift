@@ -8,10 +8,10 @@ final class OAuth2TokenStorage {
     // MARK: - Public Properties
     var token: String? {
         get {
-            storage.string(forKey: StorageKeys.OAuthToken.rawValue)
+            storage.string(forKey: StorageKeys.oAuthToken.rawValue)
         }
         set {
-            storage.set(newValue, forKey: StorageKeys.OAuthToken.rawValue)
+            storage.set(newValue, forKey: StorageKeys.oAuthToken.rawValue)
         }
     }
 }
