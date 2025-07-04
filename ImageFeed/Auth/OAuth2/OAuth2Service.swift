@@ -1,5 +1,9 @@
 import Foundation
 
+enum AuthServiceError: Error {
+    case invalidRequest
+}
+
 final class OAuth2Service {
     
     // MARK: - Shared Instance
@@ -12,17 +16,27 @@ final class OAuth2Service {
     private let storage = OAuth2TokenStorage()
     private let urlSession = URLSession.shared
     private let decoder = SnakeCaseJSONDecoder()
+    private var lastTask: URLSessionTask?
+    private var lastCode: String?
     
     // MARK: - Public Methods
     func fetchOAuthToken(_ code: String, completion: @escaping (Result<String, Error>) -> Void) {
-        
-        guard let request = makeOAuthTokenRequest(code: code) else {
-            print("❌ Ошибка создания запроса", #fileID, #function, #line)
-            completion(.failure(NetworkError.urlSessionError))
+        assert(Thread.isMainThread)
+        guard lastCode != code else {
+            completion(.failure(AuthServiceError.invalidRequest))
             return
         }
         
-        urlSession.data(for: request) { [weak self] result in
+        lastTask?.cancel()
+        lastCode = code
+        
+        guard let request = makeOAuthTokenRequest(code: code) else {
+            print("❌ Ошибка создания запроса", #fileID, #function, #line)
+            completion(.failure(AuthServiceError.invalidRequest))
+            return
+        }
+        
+        let task = urlSession.data(for: request) { [weak self] result in
             switch result {
             case .success(let data):
                 guard let self else { return }
@@ -32,6 +46,8 @@ final class OAuth2Service {
                     self.storage.token = accessToken
                     print("✅ Токен сохранён: \(token)", #fileID, #function, #line)
                     completion(.success(accessToken))
+                    self.lastTask = nil
+                    self.lastCode = nil
                 } catch let decodingError {
                     print("❌ Ошибка декодирования ответа: \(decodingError)", #fileID, #function, #line)
                     completion(.failure(decodingError))
@@ -40,7 +56,9 @@ final class OAuth2Service {
                 print("❌ Сетевая ошибка или ошибка с неподходящим статусом кода ответа: \(error)", #fileID, #function, #line)
                 completion(.failure(error))
             }
-        }.resume()
+        }
+        self.lastTask = task
+        task.resume()
         
     }
     

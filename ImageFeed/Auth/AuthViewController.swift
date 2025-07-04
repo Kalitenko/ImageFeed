@@ -44,9 +44,11 @@ final class AuthViewController: UIViewController {
 // MARK: - WebViewViewControllerDelegate
 extension AuthViewController: WebViewViewControllerDelegate {
     func webViewViewController(_ vc: WebViewViewController, didAuthenticateWithCode code: String) {
+        UIBlockingProgressHUD.show()
         oAuth2Service.fetchOAuthToken(code) { [weak self] result in
             guard let self else { return }
             print("👀 \(result)\n", #fileID, #function, #line)
+            UIBlockingProgressHUD.dismiss()
             switch result {
             case .success(_):
                 print("✅ Авторизация выполнена", #fileID, #function, #line)
