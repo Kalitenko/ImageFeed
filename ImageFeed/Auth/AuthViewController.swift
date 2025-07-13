@@ -39,6 +39,16 @@ final class AuthViewController: UIViewController {
         navigationItem.backBarButtonItem?.tintColor = UIColor(resource: .ypBackground)
     }
     
+    private func showSomethingWentWrongAlert() {
+        let alertController = UIAlertController(
+            title: "Что-то пошло не так(",
+            message: "Не удалось войти в систему",
+            preferredStyle: .alert
+        )
+        alertController.addAction(UIAlertAction(title: "OK", style: .default))
+        present(alertController, animated: true)
+    }
+    
 }
 
 // MARK: - WebViewViewControllerDelegate
@@ -47,14 +57,15 @@ extension AuthViewController: WebViewViewControllerDelegate {
         UIBlockingProgressHUD.show()
         oAuth2Service.fetchOAuthToken(code) { [weak self] result in
             guard let self else { return }
-            print("👀 \(result)\n", #fileID, #function, #line)
+            Logger.info("\(result)\n")
             UIBlockingProgressHUD.dismiss()
             switch result {
             case .success(_):
-                print("✅ Авторизация выполнена", #fileID, #function, #line)
+                Logger.success("Авторизация выполнена")
                 self.delegate?.didAuthenticate(self)
             case .failure(let error):
-                print("❌ Авторизация не удалась: \(error)", #fileID, #function, #line)
+                Logger.error("Авторизация не удалась: \(error)")
+                showSomethingWentWrongAlert()
             }
         }
     }

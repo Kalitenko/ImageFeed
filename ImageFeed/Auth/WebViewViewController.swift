@@ -14,6 +14,9 @@ final class WebViewViewController: UIViewController {
         static let unsplashAuthorizeURLString = "https://unsplash.com/oauth/authorize"
     }
     
+    // MARK: - Private Properties
+    private var estimatedProgressObservation: NSKeyValueObservation?
+    
     // MARK: - View Life Cycles
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -21,30 +24,14 @@ final class WebViewViewController: UIViewController {
         loadAuthView()
         
         webView.navigationDelegate = self
-    }
-    
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
         
-        webView.addObserver(
-            self,
-            forKeyPath: #keyPath(WKWebView.estimatedProgress),
-            options: .new,
-            context: nil)
-        updateProgress()
-    }
-    
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-        webView.removeObserver(self, forKeyPath: #keyPath(WKWebView.estimatedProgress), context: nil)
-    }
-    
-    override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
-        if keyPath == #keyPath(WKWebView.estimatedProgress) {
-            updateProgress()
-        } else {
-            super.observeValue(forKeyPath: keyPath, of: object, change: change, context: context)
-        }
+        estimatedProgressObservation = webView.observe(
+                    \.estimatedProgress,
+                    options: [],
+                    changeHandler: { [weak self] _, _ in
+                        guard let self = self else { return }
+                        self.updateProgress()
+                    })
     }
     
     // MARK: - Private Methods
@@ -55,7 +42,7 @@ final class WebViewViewController: UIViewController {
     
     private func loadAuthView() {
         guard var urlComponents = URLComponents(string: WebViewConstants.unsplashAuthorizeURLString) else {
-            print("❌ Ошибка при создании URLComponents", #fileID, #function, #line)
+            Logger.error("Ошибка при создании URLComponents")
             return
         }
         
@@ -67,12 +54,12 @@ final class WebViewViewController: UIViewController {
         ]
         
         guard let url = urlComponents.url else {
-            print("❌ Ошибка при создании URL", #fileID, #function, #line)
+            Logger.error("Ошибка при создании URL")
             return
         }
         
         let request = URLRequest(url: url)
-        print("👀 \(request)\n",#fileID, #function, #line)
+        Logger.info("\(request)\n")
         webView.load(request)
     }
 }

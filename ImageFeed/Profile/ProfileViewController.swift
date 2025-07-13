@@ -1,7 +1,9 @@
 import UIKit
+import Kingfisher
 
 final class ProfileViewController: UIViewController {
     
+    // MARK:- Layout
     // MARK: - UI Elements
     private let avatarImageView = UIImageView()
     
@@ -11,15 +13,27 @@ final class ProfileViewController: UIViewController {
     
     private let logoutButton = UIButton(type: .system)
     
-    // MARK: - Private Properties
-    var constraints: [NSLayoutConstraint] = []
+    private var constraints: [NSLayoutConstraint] = []
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
+        // MARK:- Layout
         setupView()
         setupSubViews()
         setupLayout()
+        
+        // MARK:- Logic
+        setupProfileInfo()
+        
+        if let avatarURL = ProfileImageService.shared.avatarURL,// 16
+           let url = URL(string: avatarURL) {                   // 17
+            // TODO [Sprint 11]  Обновите аватар, если нотификация
+            // была опубликована до того, как мы подписались.
+            updateAvatar(url: url)
+
+        }
+        
     }
     
     // MARK: - Setup Methods
@@ -30,7 +44,7 @@ final class ProfileViewController: UIViewController {
     private func setupSubViews() {
         setupAvatarImageView()
         setupNameLabel()
-        setupuUsernameLabel()
+        setupUsernameLabel()
         setupDescriptionLabel()
         setupLogoutButton()
     }
@@ -67,7 +81,7 @@ final class ProfileViewController: UIViewController {
         ])
     }
     
-    private func setupuUsernameLabel() {
+    private func setupUsernameLabel() {
         usernameLabel.text = "@ekaterina_nov"
         usernameLabel.textColor = UIColor(resource: .ypGray)
         usernameLabel.font = UIFont.regular13
@@ -117,7 +131,79 @@ final class ProfileViewController: UIViewController {
         NSLayoutConstraint.activate(constraints)
     }
     
+    // MARK:- Logic
+    // MARK: - Initializers
+    override init(nibName: String?, bundle: Bundle?) {
+        super.init(nibName: nibName, bundle: bundle)
+        addObserver()
+    }
+    
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        addObserver()
+    }
+    
+    // MARK: - Deinitialization
+    deinit {
+        removeObserver()
+    }
+    
+    // MARK: - Private Properties
+    private var profileService = ProfileService.shared
+    private var storage = OAuth2TokenStorage()
+    
     // MARK: - Actions
     @objc func didTapLogoutButton(_ sender: Any) {
+    }
+    
+    // MARK: - Private Methods
+    private func setupProfileInfo() {
+        
+        guard let profile = profileService.profile else {
+            Logger.error("Нет информации о профиле")
+            return
+        }
+        
+        updateProfileDetails(profile: profile)
+    }
+    
+    private func updateProfileDetails(profile: Profile) {
+        nameLabel.text = profile.name
+        usernameLabel.text = profile.loginName
+        descriptionLabel.text = profile.bio
+    }
+    
+    private func addObserver() {
+        NotificationCenter.default.addObserver(                 // 1
+            self,                                               // 2
+            selector: #selector(updateAvatar(notification:)),   // 3
+            name: ProfileImageService.didChangeNotification,    // 4
+            object: nil)                                        // 5
+    }
+    
+    private func removeObserver() {
+        NotificationCenter.default.removeObserver(              // 6
+            self,                                               // 7
+            name: ProfileImageService.didChangeNotification,    // 8
+            object: nil)                                        // 9
+    }
+    
+    @objc                                                       // 10
+    private func updateAvatar(notification: Notification) {     // 11
+        guard
+            isViewLoaded,                                       // 12
+            let userInfo = notification.userInfo,               // 13
+            let profileImageURL = userInfo["URL"] as? String,   // 14
+            let url = URL(string: profileImageURL)              // 15
+        else { return }
+        
+        // TODO [Sprint 11] Обновите аватар, используя Kingfisher
+        updateAvatar(url: url)
+        
+    }
+    
+    private func updateAvatar(url: URL) {
+        avatarImageView.kf.setImage(with: url,
+                                    placeholder: UIImage(resource: .defaultAvatarImage))
     }
 }

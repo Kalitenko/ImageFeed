@@ -31,29 +31,23 @@ final class OAuth2Service {
         lastCode = code
         
         guard let request = makeOAuthTokenRequest(code: code) else {
-            print("❌ Ошибка создания запроса", #fileID, #function, #line)
+            Logger.error("Ошибка создания запроса")
             completion(.failure(AuthServiceError.invalidRequest))
             return
         }
         
-        let task = urlSession.data(for: request) { [weak self] result in
+        let task = urlSession.objectTask(for: request) { [weak self] (result: Result<OAuthTokenResponseBody, Error>) in
             switch result {
-            case .success(let data):
+            case .success(let token):
                 guard let self else { return }
-                do {
-                    let token = try self.decoder.decode(OAuthTokenResponseBody.self, from: data)
-                    let accessToken = token.accessToken
-                    self.storage.token = accessToken
-                    print("✅ Токен сохранён: \(token)", #fileID, #function, #line)
-                    completion(.success(accessToken))
-                    self.lastTask = nil
-                    self.lastCode = nil
-                } catch let decodingError {
-                    print("❌ Ошибка декодирования ответа: \(decodingError)", #fileID, #function, #line)
-                    completion(.failure(decodingError))
-                }
+                let accessToken = token.accessToken
+                self.storage.token = accessToken
+                Logger.success("Токен сохранён: \(token)")
+                completion(.success(accessToken))
+                self.lastTask = nil
+                self.lastCode = nil
             case .failure(let error):
-                print("❌ Сетевая ошибка или ошибка с неподходящим статусом кода ответа: \(error)", #fileID, #function, #line)
+                Logger.error("Сетевая ошибка или ошибка с неподходящим статусом кода ответа: \(error)")
                 completion(.failure(error))
             }
         }
@@ -65,7 +59,7 @@ final class OAuth2Service {
     // MARK: - Private Methods
     private func makeOAuthTokenRequest(code: String) -> URLRequest? {
         guard let baseURL = URL(string: "https://unsplash.com") else {
-            print("❌ Ошибка в базовом URL Unsplash", #fileID, #function, #line)
+            Logger.error("Ошибка в базовом URL Unsplash")
             return nil
         }
         guard let url = URL(
@@ -77,7 +71,7 @@ final class OAuth2Service {
             + "&&grant_type=authorization_code",
             relativeTo: baseURL
         ) else {
-            print("❌ Ошибка при создании URL для запроса токена", #fileID, #function, #line)
+            Logger.error("Ошибка при создании URL для запроса токена")
             return nil
         }
         var request = URLRequest(url: url)
