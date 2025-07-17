@@ -2,7 +2,8 @@ import UIKit
 
 final class SplashViewController: UIViewController {
     
-    // MARK:- Layout
+    // MARK: - Layout
+    
     // MARK: - UI Elements
     private let logoImageView = UIImageView()
     
@@ -30,7 +31,8 @@ final class SplashViewController: UIViewController {
         ])
     }
     
-    // MARK:- Logic
+    // MARK: - Logic
+    
     // MARK: - Private Properties
     private let tokenStorage = OAuth2TokenStorage()
     private let showAuthenticationScreenSegueIdentifier = "ShowAuthenticationScreen"
@@ -41,26 +43,19 @@ final class SplashViewController: UIViewController {
         super.viewDidAppear(animated)
         
         guard let token = tokenStorage.token else {
-            performSegue(withIdentifier: showAuthenticationScreenSegueIdentifier, sender: nil)
+            showAuthenticationScreen()
             return
         }
         fetchProfile(token)
     }
     
     // MARK: - Navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.identifier == showAuthenticationScreenSegueIdentifier {
-            guard
-                let navigationController = segue.destination as? UINavigationController,
-                let viewController = navigationController.viewControllers[0] as? AuthViewController
-            else {
-                assertionFailure("Failed to prepare for \(showAuthenticationScreenSegueIdentifier)")
-                return
-            }
-            viewController.delegate = self
-        } else {
-            super.prepare(for: segue, sender: sender)
-        }
+    private func showAuthenticationScreen() {
+        let authViewController = AuthViewController()
+        authViewController.delegate = self
+        let navigationController = UINavigationController(rootViewController: authViewController)
+        navigationController.modalPresentationStyle = .fullScreen
+        present(navigationController, animated: true, completion: nil)
     }
     
     // MARK: - Private Methods
@@ -70,8 +65,7 @@ final class SplashViewController: UIViewController {
             assertionFailure("Invalid Configuration")
             return
         }
-        let tabBarController = UIStoryboard(name: "Main", bundle: .main)
-            .instantiateViewController(withIdentifier: "TabBarViewController")
+        let tabBarController = TabBarController()
         window.rootViewController = tabBarController
     }
     
@@ -84,7 +78,7 @@ final class SplashViewController: UIViewController {
                 Logger.debug("❗️ self is nil")
                 return
             }
-                        
+            
             switch result {
             case .success(let profile):
                 Logger.success("Информация о профиле получена")
@@ -95,13 +89,10 @@ final class SplashViewController: UIViewController {
                 self.switchToTabBarController()
             case .failure(let error):
                 Logger.error("Информация о профиле не получена: \(error)")
-                // TODO [Sprint 11] Покажите ошибку получения профиля
-                
                 break
             }
         }
     }
-    
 }
 
 // MARK: - AuthViewControllerDelegate
@@ -113,7 +104,6 @@ extension SplashViewController: AuthViewControllerDelegate {
                 Logger.success("Нет авторизационного токена")
                 return
             }
-            
             self?.fetchProfile(token)
         }
     }

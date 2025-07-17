@@ -3,7 +3,8 @@ import Kingfisher
 
 final class ProfileViewController: UIViewController {
     
-    // MARK:- Layout
+    // MARK: - Layout
+    
     // MARK: - UI Elements
     private let avatarImageView = UIImageView()
     
@@ -13,27 +14,20 @@ final class ProfileViewController: UIViewController {
     
     private let logoutButton = UIButton(type: .system)
     
-    private var constraints: [NSLayoutConstraint] = []
-    
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        // MARK:- Layout
+        // MARK: Lifecycle Layout
         setupView()
         setupSubViews()
-        setupLayout()
         
-        // MARK:- Logic
+        // MARK: Lifecycle Logic
         setupProfileInfo()
         
-        if let avatarURL = ProfileImageService.shared.avatarURL,// 16
-           let url = URL(string: avatarURL) {                   // 17
-            // TODO [Sprint 11]  Обновите аватар, если нотификация
-            // была опубликована до того, как мы подписались.
+        if let avatarURL = ProfileImageService.shared.avatarURL,
+           let url = URL(string: avatarURL) {
             updateAvatar(url: url)
-
         }
-        
     }
     
     // MARK: - Setup Methods
@@ -58,7 +52,7 @@ final class ProfileViewController: UIViewController {
         avatarImageView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(avatarImageView)
         
-        constraints.append(contentsOf: [
+        NSLayoutConstraint.activate([
             avatarImageView.widthAnchor.constraint(equalToConstant: 70),
             avatarImageView.heightAnchor.constraint(equalTo: avatarImageView.widthAnchor, multiplier: 1),
             avatarImageView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 32),
@@ -74,7 +68,7 @@ final class ProfileViewController: UIViewController {
         nameLabel.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(nameLabel)
         
-        constraints.append(contentsOf: [
+        NSLayoutConstraint.activate([
             nameLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             nameLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             nameLabel.topAnchor.constraint(equalTo: avatarImageView.bottomAnchor, constant: 8)
@@ -89,7 +83,7 @@ final class ProfileViewController: UIViewController {
         usernameLabel.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(usernameLabel)
         
-        constraints.append(contentsOf: [
+        NSLayoutConstraint.activate([
             usernameLabel.leadingAnchor.constraint(equalTo: nameLabel.leadingAnchor),
             usernameLabel.trailingAnchor.constraint(equalTo: nameLabel.trailingAnchor),
             usernameLabel.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 8)
@@ -104,7 +98,7 @@ final class ProfileViewController: UIViewController {
         descriptionLabel.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(descriptionLabel)
         
-        constraints.append(contentsOf: [
+        NSLayoutConstraint.activate([
             descriptionLabel.leadingAnchor.constraint(equalTo: nameLabel.leadingAnchor),
             descriptionLabel.trailingAnchor.constraint(equalTo: nameLabel.trailingAnchor),
             descriptionLabel.topAnchor.constraint(equalTo: usernameLabel.bottomAnchor, constant: 8)
@@ -119,7 +113,7 @@ final class ProfileViewController: UIViewController {
         logoutButton.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(logoutButton)
         
-        constraints.append(contentsOf: [
+        NSLayoutConstraint.activate([
             logoutButton.widthAnchor.constraint(equalToConstant: 44),
             logoutButton.heightAnchor.constraint(equalTo: logoutButton.widthAnchor, multiplier: 1),
             logoutButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
@@ -127,11 +121,8 @@ final class ProfileViewController: UIViewController {
         ])
     }
     
-    private func setupLayout() {
-        NSLayoutConstraint.activate(constraints)
-    }
+    // MARK: - Logic
     
-    // MARK:- Logic
     // MARK: - Initializers
     override init(nibName: String?, bundle: Bundle?) {
         super.init(nibName: nibName, bundle: bundle)
@@ -174,30 +165,28 @@ final class ProfileViewController: UIViewController {
     }
     
     private func addObserver() {
-        NotificationCenter.default.addObserver(                 // 1
-            self,                                               // 2
-            selector: #selector(updateAvatar(notification:)),   // 3
-            name: ProfileImageService.didChangeNotification,    // 4
-            object: nil)                                        // 5
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(updateAvatar(notification:)),
+            name: ProfileImageService.didChangeNotification,
+            object: nil)
     }
     
     private func removeObserver() {
-        NotificationCenter.default.removeObserver(              // 6
-            self,                                               // 7
-            name: ProfileImageService.didChangeNotification,    // 8
-            object: nil)                                        // 9
+        NotificationCenter.default.removeObserver(
+            self,
+            name: ProfileImageService.didChangeNotification,
+            object: nil)
     }
     
-    @objc                                                       // 10
-    private func updateAvatar(notification: Notification) {     // 11
+    @objc
+    private func updateAvatar(notification: Notification) {
         guard
-            isViewLoaded,                                       // 12
-            let userInfo = notification.userInfo,               // 13
-            let profileImageURL = userInfo["URL"] as? String,   // 14
-            let url = URL(string: profileImageURL)              // 15
+            isViewLoaded,
+            let userInfo = notification.userInfo,
+            let profileImageURL = userInfo["URL"] as? String,
+            let url = URL(string: profileImageURL)
         else { return }
-        
-        // TODO [Sprint 11] Обновите аватар, используя Kingfisher
         updateAvatar(url: url)
         
     }

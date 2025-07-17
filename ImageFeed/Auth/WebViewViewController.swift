@@ -3,9 +3,11 @@ import WebKit
 
 final class WebViewViewController: UIViewController {
     
-    // MARK: - IB Outlets
-    @IBOutlet private var webView: WKWebView!
-    @IBOutlet private var progressView: UIProgressView!
+    // MARK: - Layout
+    
+    // MARK: - UI Elements
+    private let webView = WKWebView()
+    private let progressView = UIProgressView()
     
     // MARK: - Public Properties
     weak var delegate: WebViewViewControllerDelegate?
@@ -20,19 +22,79 @@ final class WebViewViewController: UIViewController {
     // MARK: - View Life Cycles
     override func viewDidLoad() {
         super.viewDidLoad()
+        // MARK: Lifecycle Layout
+        setupView()
+        setupSubViews()
         
+        // MARK: Lifecycle Logic
         loadAuthView()
         
         webView.navigationDelegate = self
         
         estimatedProgressObservation = webView.observe(
-                    \.estimatedProgress,
-                    options: [],
-                    changeHandler: { [weak self] _, _ in
-                        guard let self = self else { return }
-                        self.updateProgress()
-                    })
+            \.estimatedProgress,
+             options: [],
+             changeHandler: { [weak self] _, _ in
+                 guard let self = self else { return }
+                 self.updateProgress()
+             })
     }
+    
+    // MARK: - Setup Methods
+    private func setupView() {
+        view.backgroundColor = UIColor(resource: .ypWhite)
+    }
+    
+    private func setupSubViews() {
+        setupWebView()
+        setupProgressView()
+    }
+    
+    private func setupWebView() {
+        webView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(webView)
+        
+        NSLayoutConstraint.activate([
+            webView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            webView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            webView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            webView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
+        
+        configureBackButton()
+    }
+    
+    private func setupProgressView() {
+        progressView.progressTintColor = UIColor(resource: .ypBlack)
+        
+        progressView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(progressView)
+        
+        NSLayoutConstraint.activate([
+            progressView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            progressView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
+            progressView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor)
+        ])
+    }
+    
+    private func configureBackButton() {
+        let backButton = UIBarButtonItem(
+            image: UIImage(resource: .navigationBackButton),
+            style: .plain,
+            target: self,
+            action: #selector(didTapBackButton)
+        )
+        backButton.tintColor = UIColor(resource: .ypBlack)
+        navigationItem.leftBarButtonItem = backButton
+    }
+    
+    @objc
+    private func didTapBackButton() {
+        navigationController?.popViewController(animated: true)
+    }
+    
+    
+    // MARK: - Logic
     
     // MARK: - Private Methods
     private func updateProgress() {
@@ -65,6 +127,7 @@ final class WebViewViewController: UIViewController {
 }
 
 // MARK: - WKNavigationDelegate
+
 extension WebViewViewController: WKNavigationDelegate {
     func webView(
         _ webView: WKWebView,

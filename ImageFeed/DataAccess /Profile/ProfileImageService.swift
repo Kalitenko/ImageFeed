@@ -85,7 +85,6 @@ final class ProfileImageService {
         request.setMethod(.get)
         return request
     }
-    
 }
 
 

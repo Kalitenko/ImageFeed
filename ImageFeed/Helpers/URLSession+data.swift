@@ -40,9 +40,8 @@ extension URLSession {
     ) -> URLSessionTask {
         let decoder = SnakeCaseJSONDecoder()
         let task = data(for: request) { (result: Result<Data, Error>) in
-            // TODO [Sprint 11] Напишите реализацию c декодированием Data в тип T
             switch result {
-                case .success(let data):
+            case .success(let data):
                 do {
                     let t = try decoder.decode(T.self, from: data)
                     completion(.success(t))

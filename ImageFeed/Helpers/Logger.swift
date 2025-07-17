@@ -8,6 +8,8 @@ enum Emoji: String {
 }
 
 struct Logger {
+    
+    // MARK: - Public Static Methods
     static func log(_ message: String,
                     emoji: Emoji = .info,
                     file: String = #fileID,
@@ -35,33 +37,34 @@ struct Logger {
     }
     
     static func info(_ message: String,
-                    file: String = #fileID,
-                    function: String = #function,
-                    line: Int = #line) {
+                     file: String = #fileID,
+                     function: String = #function,
+                     line: Int = #line) {
         log(message, emoji: .info, file: file, function: function, line: line, column: nil)
     }
     
     static func debug(_ message: String,
-                    file: String = #fileID,
-                    function: String = #function,
-                    line: Int = #line) {
+                      file: String = #fileID,
+                      function: String = #function,
+                      line: Int = #line) {
         log(message, emoji: .debug, file: file, function: function, line: line, column: nil)
     }
-
+    
     static func success(_ message: String,
-                    file: String = #fileID,
-                    function: String = #function,
-                    line: Int = #line) {
+                        file: String = #fileID,
+                        function: String = #function,
+                        line: Int = #line) {
         log(message, emoji: .success, file: file, function: function, line: line, column: nil)
     }
     
     static func error(_ message: String,
-                    file: String = #fileID,
-                    function: String = #function,
-                    line: Int = #line) {
+                      file: String = #fileID,
+                      function: String = #function,
+                      line: Int = #line) {
         log(message, emoji: .error, file: file, function: function, line: line, column: nil)
     }
     
+    // MARK: - Private Methods
     private static func timestamp() -> String {
         let formatter = DateFormatter()
         formatter.dateFormat = "HH:mm:ss"

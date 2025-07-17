@@ -2,48 +2,68 @@ import UIKit
 
 final class ImagesListViewController: UIViewController {
     
-    // MARK: - IB Outlets
-    @IBOutlet private var tableView: UITableView!
+    // MARK: - Layout
     
-    // MARK: - Private Properties
-    private let photosName: [String] = Array(0..<20).map{ "\($0)" }
-    private let currentDateString = Date().dateTimeString
-    private let showSingleImageSegueIdentifier = "ShowSingleImage"
+    // MARK: - UI Elements
+    private var tableView = UITableView()
     
     // MARK: - View Life Cycles
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        setupView()
+        setupSubViews()
+    }
+    
+    // MARK: - Setup Methods
+    private func setupView() {
+        view.backgroundColor = UIColor(resource: .ypBlack)
+    }
+    
+    private func setupSubViews() {
+        setupTableView()
+    }
+    
+    private func setupTableView() {
+        tableView.delegate = self
+        tableView.dataSource = self
+        tableView.backgroundColor = UIColor(resource: .ypBlack)
+        tableView.separatorStyle = .none
+        tableView.contentMode = .scaleToFill
         tableView.contentInset = UIEdgeInsets(top: 12, left: 0, bottom: 12, right: 0)
-        tableView.register(
-            UINib(nibName: ImagesListCell.reuseIdentifier, bundle: nil),
-            forCellReuseIdentifier: ImagesListCell.reuseIdentifier
-        )
+        tableView.register(ImagesListCell.self, forCellReuseIdentifier: ImagesListCell.reuseIdentifier)
+        
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(tableView)
+        
+        NSLayoutConstraint.activate([
+            tableView.topAnchor.constraint(equalTo: view.topAnchor),
+            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
     }
     
     // MARK: - Navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-            if segue.identifier == showSingleImageSegueIdentifier {
-                guard
-                    let viewController = segue.destination as? SingleImageViewController,
-                    let indexPath = sender as? IndexPath
-                else {
-                    assertionFailure("Invalid segue destination")
-                    return
-                }
-
-                let image = UIImage(named: photosName[indexPath.row])
-                viewController.image = image
-            } else {
-                super.prepare(for: segue, sender: sender)
-            }
-        }
+    private func showSingleImageScreen(image: UIImage?) {
+        let singleImageController = SingleImageViewController()
+        singleImageController.image = image
+        singleImageController.modalPresentationStyle = .fullScreen
+        present(singleImageController, animated: true)
+    }
+    
+    // MARK: - Logic
+    
+    // MARK: - Private Properties
+    private let photosName: [String] = Array(0..<20).map{ "\($0)" }
+    private let currentDateString = Date().dateTimeString
+    
 }
 
 // MARK: - UITableViewDelegate
 extension ImagesListViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        performSegue(withIdentifier: showSingleImageSegueIdentifier, sender: indexPath)
+        let image = UIImage(named: photosName[indexPath.row])
+        showSingleImageScreen(image: image)
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {

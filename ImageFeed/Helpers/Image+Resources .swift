@@ -7,4 +7,6 @@ extension ImageResource {
     static let navigationBackButton = ImageResource(name: "nav_back_button", bundle: .main)
     static let unsplashLogoImage = ImageResource(name: "unsplash_logo", bundle: .main)
     static let defaultAvatarImage = ImageResource(name: "default_avatar", bundle: .main)
+    static let tabProfileActiveImage = ImageResource(name: "tab_profile_active", bundle: .main)
+    static let tabEditorialActiveImage = ImageResource(name: "tab_editorial_active", bundle: .main)
 }
