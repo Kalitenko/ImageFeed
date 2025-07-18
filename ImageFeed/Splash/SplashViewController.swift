@@ -5,13 +5,20 @@ final class SplashViewController: UIViewController {
     // MARK: - Layout
     
     // MARK: - UI Elements
-    private let logoImageView = UIImageView()
+    private lazy var logoImageView: UIImageView = {
+        let imageView = UIImageView()
+        let logoImage = UIImage(resource: .unsplashLogoImage)
+        imageView.image = logoImage
+        
+        return imageView
+    }()
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         setupView()
-        setupLogoImageView()
+        setupSubViews()
+        setupConstraints()
     }
     
     // MARK: - Setup Methods
@@ -19,12 +26,12 @@ final class SplashViewController: UIViewController {
         view.backgroundColor = UIColor(resource: .ypBlack)
     }
     
-    private func setupLogoImageView() {
-        let logoImage = UIImage(resource: .unsplashLogoImage)
-        logoImageView.image = logoImage
+    private func setupSubViews() {
         logoImageView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(logoImageView)
-        
+    }
+    
+    private func setupConstraints() {
         NSLayoutConstraint.activate([
             logoImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             logoImageView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
@@ -34,8 +41,7 @@ final class SplashViewController: UIViewController {
     // MARK: - Logic
     
     // MARK: - Private Properties
-    private let tokenStorage = OAuth2TokenStorage()
-    private let showAuthenticationScreenSegueIdentifier = "ShowAuthenticationScreen"
+    private let tokenStorage = OAuth2TokenStorage.shared
     private var profileService = ProfileService.shared
     
     // MARK: - Lifecycle Logic

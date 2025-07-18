@@ -13,7 +13,7 @@ final class OAuth2Service {
     private init() {}
     
     // MARK: - Private Properties
-    private let storage = OAuth2TokenStorage()
+    private let storage = OAuth2TokenStorage.shared
     private let urlSession = URLSession.shared
     private let decoder = SnakeCaseJSONDecoder()
     private var lastTask: URLSessionTask?

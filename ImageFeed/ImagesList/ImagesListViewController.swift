@@ -5,25 +5,8 @@ final class ImagesListViewController: UIViewController {
     // MARK: - Layout
     
     // MARK: - UI Elements
-    private var tableView = UITableView()
-    
-    // MARK: - View Life Cycles
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        setupView()
-        setupSubViews()
-    }
-    
-    // MARK: - Setup Methods
-    private func setupView() {
-        view.backgroundColor = UIColor(resource: .ypBlack)
-    }
-    
-    private func setupSubViews() {
-        setupTableView()
-    }
-    
-    private func setupTableView() {
+    private lazy var tableView: UITableView = {
+        let tableView = UITableView()
         tableView.delegate = self
         tableView.dataSource = self
         tableView.backgroundColor = UIColor(resource: .ypBlack)
@@ -32,9 +15,28 @@ final class ImagesListViewController: UIViewController {
         tableView.contentInset = UIEdgeInsets(top: 12, left: 0, bottom: 12, right: 0)
         tableView.register(ImagesListCell.self, forCellReuseIdentifier: ImagesListCell.reuseIdentifier)
         
+        return tableView
+    }()
+    
+    // MARK: - View Life Cycles
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        setupView()
+        setupSubViews()
+        setupConstraints()
+    }
+    
+    // MARK: - Setup Methods
+    private func setupView() {
+        view.backgroundColor = UIColor(resource: .ypBlack)
+    }
+    
+    private func setupSubViews() {
         tableView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(tableView)
-        
+    }
+    
+    private func setupConstraints() {
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: view.topAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),

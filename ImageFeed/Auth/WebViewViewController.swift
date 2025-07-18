@@ -1,23 +1,27 @@
 import UIKit
 import WebKit
 
+private enum WebViewConstants {
+    static let unsplashAuthorizeURLString = "https://unsplash.com/oauth/authorize"
+}
+
 final class WebViewViewController: UIViewController {
     
     // MARK: - Layout
     
     // MARK: - UI Elements
-    private let webView = WKWebView()
-    private let progressView = UIProgressView()
+    private lazy var webView: WKWebView = {
+        let webView = WKWebView()
+        configureBackButton()
+        return webView
+    }()
     
-    // MARK: - Public Properties
-    weak var delegate: WebViewViewControllerDelegate?
-    
-    enum WebViewConstants {
-        static let unsplashAuthorizeURLString = "https://unsplash.com/oauth/authorize"
-    }
-    
-    // MARK: - Private Properties
-    private var estimatedProgressObservation: NSKeyValueObservation?
+    private lazy var progressView: UIProgressView = {
+        progressView = UIProgressView()
+        progressView.progressTintColor = UIColor(resource: .ypBlack)
+        
+        return progressView
+    }()
     
     // MARK: - View Life Cycles
     override func viewDidLoad() {
@@ -25,6 +29,7 @@ final class WebViewViewController: UIViewController {
         // MARK: Lifecycle Layout
         setupView()
         setupSubViews()
+        setupConstraints()
         
         // MARK: Lifecycle Logic
         loadAuthView()
@@ -35,7 +40,7 @@ final class WebViewViewController: UIViewController {
             \.estimatedProgress,
              options: [],
              changeHandler: { [weak self] _, _ in
-                 guard let self = self else { return }
+                 guard let self else { return }
                  self.updateProgress()
              })
     }
@@ -46,31 +51,20 @@ final class WebViewViewController: UIViewController {
     }
     
     private func setupSubViews() {
-        setupWebView()
-        setupProgressView()
+        [webView, progressView].forEach {
+            $0.translatesAutoresizingMaskIntoConstraints = false
+            view.addSubview($0)
+        }
     }
     
-    private func setupWebView() {
-        webView.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(webView)
+    private func setupConstraints() {
         
         NSLayoutConstraint.activate([
             webView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             webView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             webView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            webView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-        ])
-        
-        configureBackButton()
-    }
-    
-    private func setupProgressView() {
-        progressView.progressTintColor = UIColor(resource: .ypBlack)
-        
-        progressView.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(progressView)
-        
-        NSLayoutConstraint.activate([
+            webView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            
             progressView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             progressView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
             progressView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor)
@@ -95,6 +89,12 @@ final class WebViewViewController: UIViewController {
     
     
     // MARK: - Logic
+    
+    // MARK: - Public Properties
+    weak var delegate: WebViewViewControllerDelegate?
+    
+    // MARK: - Private Properties
+    private var estimatedProgressObservation: NSKeyValueObservation?
     
     // MARK: - Private Methods
     private func updateProgress() {

@@ -5,6 +5,14 @@ enum ProfileServiceError: Error {
     case profileRequested
 }
 
+// MARK: - Constants
+private enum ClassConstants {
+    static let url = "https://api.unsplash.com"
+    static let path = "/me"
+    static let authorizationHeader = "Authorization"
+    static let header = "Bearer "
+}
+
 final class ProfileService {
     
     // MARK: - Shared Instance
@@ -52,21 +60,21 @@ final class ProfileService {
     
     // MARK: - Private Methods
     private func makeProfileRequest(token: String) -> URLRequest? {
-        guard let baseURL = URL(string: "https://api.unsplash.com") else {
+        guard let baseURL = URL(string: ClassConstants.url) else {
             Logger.error("Ошибка в базовом URL API Unsplash")
             return nil
         }
         guard let url = URL(
-            string: "/me",
+            string: ClassConstants.path,
             relativeTo: baseURL
         ) else {
             Logger.error("Ошибка при создании URL для запроса профиля")
             return nil
         }
         var request = URLRequest(url: url)
-        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        request.setValue(ClassConstants.header + token, forHTTPHeaderField: ClassConstants.authorizationHeader)
         Logger.info("\(request)\n")
-        Logger.info("\(request.value(forHTTPHeaderField: "Authorization") ?? "❌ Нет токена в заголовке")")
+        Logger.info("\(request.value(forHTTPHeaderField: ClassConstants.authorizationHeader) ?? "❌ Нет токена в заголовке")")
         request.setMethod(.get)
         return request
     }

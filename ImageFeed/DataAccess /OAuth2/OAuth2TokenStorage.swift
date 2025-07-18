@@ -3,6 +3,12 @@ import SwiftKeychainWrapper
 
 final class OAuth2TokenStorage {
     
+    // MARK: - Shared Instance
+    static let shared = OAuth2TokenStorage()
+    
+    // MARK: - Initializer
+    private init() {}
+    
     // MARK: - Private Properties
     private let storage: KeychainWrapper = .standard
     

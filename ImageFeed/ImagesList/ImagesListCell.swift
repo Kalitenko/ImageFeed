@@ -1,15 +1,63 @@
 import UIKit
 
+// MARK: - Constants
+private enum ClassConstants {
+    static let reuseIdentifier = "ImagesListCell"
+}
+
+private enum Layout {
+    static let cellImageCornerRadius: CGFloat = 16
+    
+    static let cellImageTop: CGFloat = 4
+    static let cellImageHorizontal: CGFloat = 16
+    static let cellImageBottom: CGFloat = 4
+
+    static let gradientHeight: CGFloat = 30
+
+    static let likeButtonSize: CGFloat = 44
+
+    static let dateLabelHorizontalInset: CGFloat = 8
+    static let dateLabelBottomInset: CGFloat = 8
+}
+
 final class ImagesListCell: UITableViewCell {
     
     // MARK: - Public Static Properties
-    static let reuseIdentifier = "ImagesListCell"
+    static let reuseIdentifier = ClassConstants.reuseIdentifier
     
     // MARK: - UI Elements
-    private let cellImage = UIImageView()
-    private let gradientView = UIView()
-    private let likeButton = UIButton(type: .custom)
-    private let dateLabel = UILabel()
+    private lazy var cellImage: UIImageView = {
+        let imageView = UIImageView()
+        
+        imageView.layer.cornerRadius = Layout.cellImageCornerRadius
+        imageView.layer.masksToBounds = true
+        imageView.clipsToBounds = true
+        
+        return imageView
+    }()
+    
+    private lazy var gradientView: UIImageView = {
+        let imageView = UIImageView()
+        imageView.image = UIImage(resource: .gradientOverlayImage)
+        imageView.contentMode = .scaleToFill
+        
+        return imageView
+    }()
+    
+    private lazy var likeButton: UIButton = {
+        let button = UIButton(type: .custom)
+        button.setImage(UIImage(resource: .isNotLiked), for: .normal)
+        
+        return button
+    }()
+    
+    private lazy var dateLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.regular13
+        label.textColor = UIColor(resource: .ypWhite)
+        
+        return label
+    }()
     
     // MARK: - Init
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
@@ -17,6 +65,7 @@ final class ImagesListCell: UITableViewCell {
         selectionStyle = .none
         setupView()
         setupSubViews()
+        setupConstraints()
     }
     
     required init?(coder: NSCoder) {
@@ -30,77 +79,36 @@ final class ImagesListCell: UITableViewCell {
     }
     
     private func setupSubViews() {
-        setupCellImage()
-        setupGradientView()
-        setupLikeButton()
-        setupDateLabel()
-    }
-    
-    private func setupCellImage() {
-        
-        cellImage.layer.cornerRadius = 16
-        cellImage.layer.masksToBounds = true
-        cellImage.clipsToBounds = true
-        
-        cellImage.translatesAutoresizingMaskIntoConstraints = false
-        contentView.addSubview(cellImage)
-        
-        NSLayoutConstraint.activate([
-            cellImage.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 4),
-            cellImage.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            cellImage.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-            cellImage.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -4)
-        ])
-    }
-    
-    private func setupGradientView() {
-        gradientView.translatesAutoresizingMaskIntoConstraints = false
+        [cellImage, gradientView, likeButton, dateLabel].forEach {
+            $0.translatesAutoresizingMaskIntoConstraints = false
+        }
+        [cellImage, likeButton].forEach {
+            contentView.addSubview($0)
+        }
         cellImage.addSubview(gradientView)
-        
-        let gradientOverlay = UIImageView(image: UIImage(resource: .gradientOverlayImage))
-        gradientOverlay.contentMode = .scaleToFill
-        
-        gradientOverlay.translatesAutoresizingMaskIntoConstraints = false
-        gradientView.addSubview(gradientOverlay)
-        
+        gradientView.addSubview(dateLabel)
+    }
+    
+    private func setupConstraints() {
         NSLayoutConstraint.activate([
-            gradientView.heightAnchor.constraint(equalToConstant: 30),
+            cellImage.topAnchor.constraint(equalTo: contentView.topAnchor, constant: Layout.cellImageTop),
+            cellImage.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: Layout.cellImageHorizontal),
+            cellImage.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -Layout.cellImageHorizontal),
+            cellImage.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -Layout.cellImageBottom),
+            
+            gradientView.heightAnchor.constraint(equalToConstant: Layout.gradientHeight),
             gradientView.bottomAnchor.constraint(equalTo: cellImage.bottomAnchor),
             gradientView.leadingAnchor.constraint(equalTo: cellImage.leadingAnchor),
             gradientView.trailingAnchor.constraint(equalTo: cellImage.trailingAnchor),
             
-            gradientOverlay.leadingAnchor.constraint(equalTo: gradientView.leadingAnchor),
-            gradientOverlay.trailingAnchor.constraint(equalTo: gradientView.trailingAnchor),
-            gradientOverlay.topAnchor.constraint(equalTo: gradientView.topAnchor),
-            gradientOverlay.bottomAnchor.constraint(equalTo: gradientView.bottomAnchor)
-        ])
-    }
-    
-    private func setupLikeButton() {
-        likeButton.setImage(UIImage(resource: .isNotLiked), for: .normal)
-        
-        likeButton.translatesAutoresizingMaskIntoConstraints = false
-        contentView.addSubview(likeButton)
-        
-        NSLayoutConstraint.activate([
-            likeButton.heightAnchor.constraint(equalToConstant: 44),
+            likeButton.heightAnchor.constraint(equalToConstant: Layout.likeButtonSize),
             likeButton.widthAnchor.constraint(equalTo: likeButton.heightAnchor, multiplier: 1),
             likeButton.topAnchor.constraint(equalTo: cellImage.topAnchor),
-            likeButton.trailingAnchor.constraint(equalTo: cellImage.trailingAnchor)
-        ])
-    }
-    
-    private func setupDateLabel() {
-        dateLabel.font = UIFont.regular13
-        dateLabel.textColor = UIColor(resource: .ypWhite)
-        
-        dateLabel.translatesAutoresizingMaskIntoConstraints = false
-        gradientView.addSubview(dateLabel)
-        
-        NSLayoutConstraint.activate([
-            dateLabel.leadingAnchor.constraint(equalTo: gradientView.leadingAnchor, constant: 8),
-            dateLabel.trailingAnchor.constraint(equalTo: gradientView.trailingAnchor, constant: -8),
-            dateLabel.bottomAnchor.constraint(equalTo: gradientView.bottomAnchor, constant: -8)
+            likeButton.trailingAnchor.constraint(equalTo: cellImage.trailingAnchor),
+            
+            dateLabel.leadingAnchor.constraint(equalTo: gradientView.leadingAnchor, constant: Layout.dateLabelHorizontalInset),
+            dateLabel.trailingAnchor.constraint(equalTo: gradientView.trailingAnchor, constant: -Layout.dateLabelHorizontalInset),
+            dateLabel.bottomAnchor.constraint(equalTo: gradientView.bottomAnchor, constant: -Layout.dateLabelBottomInset)
         ])
     }
     

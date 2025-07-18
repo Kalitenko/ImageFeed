@@ -1,6 +1,6 @@
 import Foundation
 
-struct UserResult: Codable {
+struct UserResult: Decodable {
     let profileImage: [String: String]
     
     func getSmallProfileImageURL() -> URL? {

@@ -34,6 +34,8 @@ final class TabBarController: UITabBarController {
         let appearance = UITabBarAppearance()
         appearance.configureWithOpaqueBackground()
         appearance.backgroundColor = UIColor(resource: .ypBlack)
+        appearance.stackedLayoutAppearance.normal.iconColor = UIColor(resource: .ypWhiteAlpha50)
+        appearance.stackedLayoutAppearance.selected.iconColor = UIColor(resource: .ypWhite)
         
         tabBar.standardAppearance = appearance
         if #available(iOS 15.0, *) {

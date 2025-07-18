@@ -1,18 +1,70 @@
 import UIKit
 import Kingfisher
 
+private enum Layout {
+    static let avatarCornerRadius: CGFloat = 35
+    
+    static let nameLabelExampleText = "Екатерина Новикова"
+    static let usernameLabelExampleText = "@ekaterina_nov"
+    static let descriptionLabelExampleText = "Hello, world!"
+    
+    static let avatarSize: CGFloat = 70
+    static let topInset: CGFloat = 32
+    static let horizontalInset: CGFloat = 16
+    static let labelSpacing: CGFloat = 8
+    static let logoutButtonSize: CGFloat = 44
+}
+
 final class ProfileViewController: UIViewController {
     
     // MARK: - Layout
     
     // MARK: - UI Elements
-    private let avatarImageView = UIImageView()
+    private lazy var avatarImageView: UIImageView = {
+        let imageView = UIImageView()
+        let avatarImage = UIImage(resource: .sampleAvatar)
+        imageView.image = avatarImage
+        imageView.layer.cornerRadius = Layout.avatarCornerRadius
+        imageView.layer.masksToBounds = true
+        
+        return imageView
+    }()
     
-    private let nameLabel = UILabel()
-    private let usernameLabel = UILabel()
-    private let descriptionLabel = UILabel()
+    private lazy var nameLabel: UILabel = {
+        let label = UILabel()
+        label.text = Layout.nameLabelExampleText
+        label.textColor = UIColor(resource: .ypWhite)
+        label.font = UIFont.bold23
+        
+        return label
+    }()
     
-    private let logoutButton = UIButton(type: .system)
+    private lazy var usernameLabel: UILabel = {
+        let label = UILabel()
+        label.text = Layout.usernameLabelExampleText
+        label.textColor = UIColor(resource: .ypGray)
+        label.font = UIFont.regular13
+        
+        return label
+    }()
+    
+    private lazy var descriptionLabel: UILabel = {
+        let label = UILabel()
+        label.text = Layout.descriptionLabelExampleText
+        label.textColor = UIColor(resource: .ypWhite)
+        label.font = UIFont.regular13
+        
+        return label
+    }()
+    
+    private lazy var logoutButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setImage(UIImage(resource: .exitImage), for: UIControl.State.normal)
+        button.addTarget(self, action: #selector(Self.didTapLogoutButton), for: .touchUpInside)
+        button.tintColor = UIColor(resource: .ypRed)
+        
+        return button
+    }()
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
@@ -20,6 +72,7 @@ final class ProfileViewController: UIViewController {
         // MARK: Lifecycle Layout
         setupView()
         setupSubViews()
+        setupConstraints()
         
         // MARK: Lifecycle Logic
         setupProfileInfo()
@@ -36,87 +89,34 @@ final class ProfileViewController: UIViewController {
     }
     
     private func setupSubViews() {
-        setupAvatarImageView()
-        setupNameLabel()
-        setupUsernameLabel()
-        setupDescriptionLabel()
-        setupLogoutButton()
+        [avatarImageView, nameLabel, usernameLabel, descriptionLabel, logoutButton].forEach {
+            $0.translatesAutoresizingMaskIntoConstraints = false
+            view.addSubview($0)
+        }
     }
     
-    private func setupAvatarImageView() {
-        let avatarImage = UIImage(resource: .sampleAvatar)
-        avatarImageView.image = avatarImage
-        avatarImageView.layer.cornerRadius = 35
-        avatarImageView.layer.masksToBounds = true
-        
-        avatarImageView.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(avatarImageView)
-        
+    private func setupConstraints() {
         NSLayoutConstraint.activate([
-            avatarImageView.widthAnchor.constraint(equalToConstant: 70),
+            avatarImageView.widthAnchor.constraint(equalToConstant: Layout.avatarSize),
             avatarImageView.heightAnchor.constraint(equalTo: avatarImageView.widthAnchor, multiplier: 1),
-            avatarImageView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 32),
-            avatarImageView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16)
-        ])
-    }
-    
-    private func setupNameLabel() {
-        nameLabel.text = "Екатерина Новикова"
-        nameLabel.textColor = UIColor(resource: .ypWhite)
-        nameLabel.font = UIFont.bold23
-        
-        nameLabel.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(nameLabel)
-        
-        NSLayoutConstraint.activate([
-            nameLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            nameLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            nameLabel.topAnchor.constraint(equalTo: avatarImageView.bottomAnchor, constant: 8)
-        ])
-    }
-    
-    private func setupUsernameLabel() {
-        usernameLabel.text = "@ekaterina_nov"
-        usernameLabel.textColor = UIColor(resource: .ypGray)
-        usernameLabel.font = UIFont.regular13
-        
-        usernameLabel.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(usernameLabel)
-        
-        NSLayoutConstraint.activate([
+            avatarImageView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: Layout.topInset),
+            avatarImageView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: Layout.horizontalInset),
+            
+            nameLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: Layout.horizontalInset),
+            nameLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -Layout.horizontalInset),
+            nameLabel.topAnchor.constraint(equalTo: avatarImageView.bottomAnchor, constant: Layout.labelSpacing),
+            
             usernameLabel.leadingAnchor.constraint(equalTo: nameLabel.leadingAnchor),
             usernameLabel.trailingAnchor.constraint(equalTo: nameLabel.trailingAnchor),
-            usernameLabel.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 8)
-        ])
-    }
-    
-    private func setupDescriptionLabel() {
-        descriptionLabel.text = "Hello, world!"
-        descriptionLabel.textColor = UIColor(resource: .ypWhite)
-        descriptionLabel.font = UIFont.regular13
-        
-        descriptionLabel.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(descriptionLabel)
-        
-        NSLayoutConstraint.activate([
+            usernameLabel.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: Layout.labelSpacing),
+            
             descriptionLabel.leadingAnchor.constraint(equalTo: nameLabel.leadingAnchor),
             descriptionLabel.trailingAnchor.constraint(equalTo: nameLabel.trailingAnchor),
-            descriptionLabel.topAnchor.constraint(equalTo: usernameLabel.bottomAnchor, constant: 8)
-        ])
-    }
-    
-    private func setupLogoutButton() {
-        logoutButton.setImage(UIImage(resource: .exitImage), for: UIControl.State.normal)
-        logoutButton.addTarget(self, action: #selector(Self.didTapLogoutButton), for: .touchUpInside)
-        logoutButton.tintColor = UIColor(resource: .ypRed)
-        
-        logoutButton.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(logoutButton)
-        
-        NSLayoutConstraint.activate([
-            logoutButton.widthAnchor.constraint(equalToConstant: 44),
+            descriptionLabel.topAnchor.constraint(equalTo: usernameLabel.bottomAnchor, constant: Layout.labelSpacing),
+            
+            logoutButton.widthAnchor.constraint(equalToConstant: Layout.logoutButtonSize),
             logoutButton.heightAnchor.constraint(equalTo: logoutButton.widthAnchor, multiplier: 1),
-            logoutButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            logoutButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -Layout.horizontalInset),
             logoutButton.centerYAnchor.constraint(equalTo: avatarImageView.centerYAnchor)
         ])
     }
@@ -141,7 +141,7 @@ final class ProfileViewController: UIViewController {
     
     // MARK: - Private Properties
     private var profileService = ProfileService.shared
-    private var storage = OAuth2TokenStorage()
+    private var storage = OAuth2TokenStorage.shared
     
     // MARK: - Actions
     @objc func didTapLogoutButton(_ sender: Any) {

@@ -20,7 +20,7 @@ final class ProfileImageService {
     private let decoder = SnakeCaseJSONDecoder()
     private var lastTask: URLSessionTask?
     private(set) var avatarURL: String?
-    private let tokenStorage = OAuth2TokenStorage()
+    private let tokenStorage = OAuth2TokenStorage.shared
     
     // MARK: - Public Methods
     func fetchProfileImageURL(username: String, _ completion: @escaping (Result<String, Error>) -> Void) {

@@ -1,15 +1,52 @@
 import UIKit
 
+private enum Layout {
+    static let minimumZoomScale = 0.1
+    static let maximumZoomScale = 1.25
+    
+    static let sideInset: CGFloat = 8
+    static let bottomInset: CGFloat = 17
+
+    static let backwardButtonSize: CGFloat = 48
+    static let shareButtonSize: CGFloat = 50
+}
+
 final class SingleImageViewController: UIViewController {
     
     // MARK: - Layout
     
     // MARK: - UI Elements
-    private var imageView = UIImageView()
-    private var scrollView = UIScrollView()
+    private lazy var imageView: UIImageView = {
+        let imageView = UIImageView()
+        imageView.contentMode = .scaleAspectFit
+        
+        return imageView
+    }()
     
-    private let backwardButton = UIButton(type: .custom)
-    private let shareButton = UIButton(type: .custom)
+    private lazy var scrollView: UIScrollView = {
+        let scrollView = UIScrollView()
+        scrollView.minimumZoomScale = Layout.minimumZoomScale
+        scrollView.maximumZoomScale = Layout.maximumZoomScale
+        scrollView.delegate = self
+        
+        return scrollView
+    }()
+    
+    private lazy var backwardButton: UIButton = {
+        let button = UIButton(type: .custom)
+        button.setImage(UIImage(resource: .backward), for: .normal)
+        button.addTarget(self, action: #selector(Self.didTapCloseButton), for: .touchUpInside)
+        
+        return button
+    }()
+    
+    private lazy var shareButton: UIButton = {
+        let button = UIButton(type: .custom)
+        button.setImage(UIImage(resource: .sharing), for: .normal)
+        button.addTarget(self, action: #selector(Self.didTapShareButton), for: .touchUpInside)
+        
+        return button
+    }()
     
     // MARK: - View Life Cycles
     override func viewDidLoad() {
@@ -17,6 +54,7 @@ final class SingleImageViewController: UIViewController {
         // MARK: Lifecycle Layout
         setupView()
         setupSubViews()
+        setupConstraints()
         
         // MARK: Lifecycle Logic
         guard let image else { return }
@@ -29,10 +67,11 @@ final class SingleImageViewController: UIViewController {
     }
     
     private func setupSubViews() {
-        setupImageView()
-        setupScrollView()
-        setupBackwardButton()
-        setupShareButton()
+        [scrollView, backwardButton, shareButton].forEach {
+            $0.translatesAutoresizingMaskIntoConstraints = false
+            view.addSubview($0)
+        }
+        scrollView.addSubview(imageView)
     }
     
     private func setupImageView() {
@@ -42,53 +81,24 @@ final class SingleImageViewController: UIViewController {
         view.addSubview(imageView)
     }
     
-    private func setupScrollView() {
-        scrollView.minimumZoomScale = 0.1
-        scrollView.maximumZoomScale = 1.25
-        
-        scrollView.delegate = self
-        
-        scrollView.translatesAutoresizingMaskIntoConstraints = false
-        scrollView.addSubview(imageView)
-        view.addSubview(scrollView)
-        
+    private func setupConstraints() {
         NSLayoutConstraint.activate([
             scrollView.topAnchor.constraint(equalTo: view.topAnchor),
             scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-        ])
-    }
-    
-    private func setupBackwardButton() {
-        backwardButton.setImage(UIImage(resource: .backward), for: .normal)
-        backwardButton.addTarget(self, action: #selector(Self.didTapCloseButton), for: .touchUpInside)
-        
-        backwardButton.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(backwardButton)
-        
-        NSLayoutConstraint.activate([
-            backwardButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 8),
-            backwardButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 8),
-            backwardButton.heightAnchor.constraint(equalToConstant: 48),
-            backwardButton.widthAnchor.constraint(equalTo: backwardButton.heightAnchor, multiplier: 1)
-        ])
-    }
-    
-    private func setupShareButton() {
-        shareButton.setImage(UIImage(resource: .sharing), for: .normal)
-        shareButton.addTarget(self, action: #selector(Self.didTapShareButton), for: .touchUpInside)
-        
-        shareButton.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(shareButton)
-        
-        NSLayoutConstraint.activate([
+            scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            
+            backwardButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: Layout.sideInset),
+            backwardButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: Layout.sideInset),
+            backwardButton.heightAnchor.constraint(equalToConstant: Layout.backwardButtonSize),
+            backwardButton.widthAnchor.constraint(equalTo: backwardButton.heightAnchor, multiplier: 1),
+            
             shareButton.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor),
-            shareButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -17),
-            shareButton.heightAnchor.constraint(equalToConstant: 50),
+            shareButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -Layout.bottomInset),
+            shareButton.heightAnchor.constraint(equalToConstant: Layout.shareButtonSize),
             shareButton.widthAnchor.constraint(equalTo: shareButton.heightAnchor, multiplier: 1)
         ])
-    }    
+    }
     
     // MARK: - Logic
     

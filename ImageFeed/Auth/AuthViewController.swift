@@ -1,18 +1,55 @@
 import UIKit
 
+// MARK: - Constants
+private enum ClassConstants {
+    fileprivate enum Layout {
+        static let loginButtonTitle = "Войти"
+        static let loginButtonCornerRadius: CGFloat = 16
+        
+        static let buttonHeight: CGFloat = 48
+        static let horizontalInset: CGFloat = 16
+        static let bottomInset: CGFloat = 90
+    }
+    
+    fileprivate enum Alert {
+        static let title = "Что-то пошло не так("
+        static let message = "Не удалось войти в систему"
+        static let actionTitle = "OK"
+    }
+}
+
 final class AuthViewController: UIViewController {
     
     // MARK: - Layout
     
     // MARK: - UI Elements
-    private let unsplashLogoImageView = UIImageView()
-    private let loginButton = UIButton(type: .system)
+    private lazy var unsplashLogoImageView: UIImageView = {
+        let imageView = UIImageView()
+        let logoImage = UIImage(resource: .unsplashLogoImage)
+        imageView.image = logoImage
+        
+        return imageView
+    }()
+    
+    private lazy var loginButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.tintColor = UIColor(resource: .ypBlack)
+        button.backgroundColor = UIColor(resource: .ypWhite)
+        button.titleLabel?.font = UIFont.bold17
+        button.setTitle(ClassConstants.Layout.loginButtonTitle, for: .normal)
+        button.layer.cornerRadius = ClassConstants.Layout.loginButtonCornerRadius
+        button.layer.masksToBounds = true
+        button.addTarget(self, action: #selector(Self.didTapLoginButton), for: .touchUpInside)
+        
+        return button
+    }()
     
     // MARK: - View Life Cycles
     override func viewDidLoad() {
         super.viewDidLoad()
         setupView()
         setupSubViews()
+        setupConstraints()
     }
     
     // MARK: - Setup Methods
@@ -21,41 +58,21 @@ final class AuthViewController: UIViewController {
     }
     
     private func setupSubViews() {
-        setupUnsplashLogoImageView()
-        setupLoginButton()
+        [unsplashLogoImageView, loginButton].forEach {
+            $0.translatesAutoresizingMaskIntoConstraints = false
+            view.addSubview($0)
+        }
     }
     
-    private func setupUnsplashLogoImageView() {
-        let logoImage = UIImage(resource: .unsplashLogoImage)
-        unsplashLogoImageView.image = logoImage
-        
-        unsplashLogoImageView.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(unsplashLogoImageView)
-        
+    private func setupConstraints() {
         NSLayoutConstraint.activate([
             unsplashLogoImageView.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor),
-            unsplashLogoImageView.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor)
+            unsplashLogoImageView.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor),
             
-        ])
-    }
-    
-    private func setupLoginButton() {
-        loginButton.addTarget(self, action: #selector(Self.didTapLoginButton), for: .touchUpInside)
-        loginButton.tintColor = UIColor(resource: .ypBlack)
-        loginButton.backgroundColor = UIColor(resource: .ypWhite)
-        loginButton.titleLabel?.font = UIFont.bold17
-        loginButton.setTitle("Войти", for: .normal)
-        loginButton.layer.cornerRadius = 16
-        loginButton.layer.masksToBounds = true
-        
-        loginButton.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(loginButton)
-        
-        NSLayoutConstraint.activate([
-            loginButton.heightAnchor.constraint(equalToConstant: 48),
-            loginButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            loginButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            loginButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -90)
+            loginButton.heightAnchor.constraint(equalToConstant: ClassConstants.Layout.buttonHeight),
+            loginButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: ClassConstants.Layout.horizontalInset),
+            loginButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -ClassConstants.Layout.horizontalInset),
+            loginButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -ClassConstants.Layout.bottomInset)
         ])
     }
     
@@ -78,17 +95,16 @@ final class AuthViewController: UIViewController {
     weak var delegate: AuthViewControllerDelegate?
     
     // MARK: - Private Properties
-    private let segueIdentifier = "ShowWebView"
     private let oAuth2Service = OAuth2Service.shared
     
     // MARK: - Private Methods
     private func showSomethingWentWrongAlert() {
         let alertController = UIAlertController(
-            title: "Что-то пошло не так(",
-            message: "Не удалось войти в систему",
+            title: ClassConstants.Alert.title,
+            message: ClassConstants.Alert.message,
             preferredStyle: .alert
         )
-        alertController.addAction(UIAlertAction(title: "OK", style: .default))
+        alertController.addAction(UIAlertAction(title: ClassConstants.Alert.actionTitle, style: .default))
         present(alertController, animated: true)
     }
 }
