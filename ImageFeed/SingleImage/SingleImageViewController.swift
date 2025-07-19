@@ -1,10 +1,106 @@
 import UIKit
 
+private enum Layout {
+    static let minimumZoomScale = 0.1
+    static let maximumZoomScale = 1.25
+    
+    static let sideInset: CGFloat = 8
+    static let bottomInset: CGFloat = 17
+
+    static let backwardButtonSize: CGFloat = 48
+    static let shareButtonSize: CGFloat = 50
+}
+
 final class SingleImageViewController: UIViewController {
     
-    // MARK: - IB Outlets
-    @IBOutlet private weak var imageView: UIImageView!
-    @IBOutlet private weak var scrollView: UIScrollView!
+    // MARK: - Layout
+    
+    // MARK: - UI Elements
+    private lazy var imageView: UIImageView = {
+        let imageView = UIImageView()
+        imageView.contentMode = .scaleAspectFit
+        
+        return imageView
+    }()
+    
+    private lazy var scrollView: UIScrollView = {
+        let scrollView = UIScrollView()
+        scrollView.minimumZoomScale = Layout.minimumZoomScale
+        scrollView.maximumZoomScale = Layout.maximumZoomScale
+        scrollView.delegate = self
+        
+        return scrollView
+    }()
+    
+    private lazy var backwardButton: UIButton = {
+        let button = UIButton(type: .custom)
+        button.setImage(UIImage(resource: .backward), for: .normal)
+        button.addTarget(self, action: #selector(Self.didTapCloseButton), for: .touchUpInside)
+        
+        return button
+    }()
+    
+    private lazy var shareButton: UIButton = {
+        let button = UIButton(type: .custom)
+        button.setImage(UIImage(resource: .sharing), for: .normal)
+        button.addTarget(self, action: #selector(Self.didTapShareButton), for: .touchUpInside)
+        
+        return button
+    }()
+    
+    // MARK: - View Life Cycles
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        // MARK: Lifecycle Layout
+        setupView()
+        setupSubViews()
+        setupConstraints()
+        
+        // MARK: Lifecycle Logic
+        guard let image else { return }
+        setAndRescaleAndCenterImageInScrollView(image: image)
+    }
+    
+    // MARK: - Setup Methods
+    private func setupView() {
+        view.backgroundColor = UIColor(resource: .ypBlack)
+    }
+    
+    private func setupSubViews() {
+        [scrollView, backwardButton, shareButton].forEach {
+            $0.translatesAutoresizingMaskIntoConstraints = false
+            view.addSubview($0)
+        }
+        scrollView.addSubview(imageView)
+    }
+    
+    private func setupImageView() {
+        imageView.contentMode = .scaleAspectFit
+        
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(imageView)
+    }
+    
+    private func setupConstraints() {
+        NSLayoutConstraint.activate([
+            scrollView.topAnchor.constraint(equalTo: view.topAnchor),
+            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            
+            backwardButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: Layout.sideInset),
+            backwardButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: Layout.sideInset),
+            backwardButton.heightAnchor.constraint(equalToConstant: Layout.backwardButtonSize),
+            backwardButton.widthAnchor.constraint(equalTo: backwardButton.heightAnchor, multiplier: 1),
+            
+            shareButton.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor),
+            shareButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -Layout.bottomInset),
+            shareButton.heightAnchor.constraint(equalToConstant: Layout.shareButtonSize),
+            shareButton.widthAnchor.constraint(equalTo: shareButton.heightAnchor, multiplier: 1)
+        ])
+    }
+    
+    // MARK: - Logic
     
     // MARK: - Public Properties
     var image: UIImage? {
@@ -14,22 +110,14 @@ final class SingleImageViewController: UIViewController {
         }
     }
     
-    // MARK: - View Life Cycles
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        scrollView.minimumZoomScale = 0.1
-        scrollView.maximumZoomScale = 1.25
-        
-        guard let image else { return }
-        setAndRescaleAndCenterImageInScrollView(image: image)
-    }
-    
     // MARK: - IB Actions
-    @IBAction private func didTapCloseButton() {
+    @objc
+    private func didTapCloseButton() {
         dismiss(animated: true, completion: nil)
     }
     
-    @IBAction private func didTapShareButton(_ sender: UIButton) {
+    @objc
+    private func didTapShareButton(_ sender: UIButton) {
         guard let image else { return }
         let share = UIActivityViewController(
             activityItems: [image],
@@ -82,6 +170,6 @@ extension SingleImageViewController: UIScrollViewDelegate {
         imageView
     }
     func scrollViewDidZoom(_ scrollView: UIScrollView) {
-      centerImageViewInScrollView()
+        centerImageViewInScrollView()
     }
 }

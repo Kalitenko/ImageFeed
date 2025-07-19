@@ -1,5 +1,9 @@
 import Foundation
 
+enum AuthServiceError: Error {
+    case invalidRequest
+}
+
 final class OAuth2Service {
     
     // MARK: - Shared Instance
@@ -9,45 +13,53 @@ final class OAuth2Service {
     private init() {}
     
     // MARK: - Private Properties
-    private let storage = OAuth2TokenStorage()
+    private let storage = OAuth2TokenStorage.shared
     private let urlSession = URLSession.shared
     private let decoder = SnakeCaseJSONDecoder()
+    private var lastTask: URLSessionTask?
+    private var lastCode: String?
     
     // MARK: - Public Methods
     func fetchOAuthToken(_ code: String, completion: @escaping (Result<String, Error>) -> Void) {
-        
-        guard let request = makeOAuthTokenRequest(code: code) else {
-            print("❌ Ошибка создания запроса", #fileID, #function, #line)
-            completion(.failure(NetworkError.urlSessionError))
+        assert(Thread.isMainThread)
+        guard lastCode != code else {
+            completion(.failure(AuthServiceError.invalidRequest))
             return
         }
         
-        urlSession.data(for: request) { [weak self] result in
+        lastTask?.cancel()
+        lastCode = code
+        
+        guard let request = makeOAuthTokenRequest(code: code) else {
+            Logger.error("Ошибка создания запроса")
+            completion(.failure(AuthServiceError.invalidRequest))
+            return
+        }
+        
+        let task = urlSession.objectTask(for: request) { [weak self] (result: Result<OAuthTokenResponseBody, Error>) in
             switch result {
-            case .success(let data):
+            case .success(let token):
                 guard let self else { return }
-                do {
-                    let token = try self.decoder.decode(OAuthTokenResponseBody.self, from: data)
-                    let accessToken = token.accessToken
-                    self.storage.token = accessToken
-                    print("✅ Токен сохранён: \(token)", #fileID, #function, #line)
-                    completion(.success(accessToken))
-                } catch let decodingError {
-                    print("❌ Ошибка декодирования ответа: \(decodingError)", #fileID, #function, #line)
-                    completion(.failure(decodingError))
-                }
+                let accessToken = token.accessToken
+                self.storage.token = accessToken
+                Logger.success("Токен сохранён: \(token)")
+                completion(.success(accessToken))
+                self.lastTask = nil
+                self.lastCode = nil
             case .failure(let error):
-                print("❌ Сетевая ошибка или ошибка с неподходящим статусом кода ответа: \(error)", #fileID, #function, #line)
+                Logger.error("Сетевая ошибка или ошибка с неподходящим статусом кода ответа: \(error)")
                 completion(.failure(error))
             }
-        }.resume()
+        }
+        self.lastTask = task
+        task.resume()
         
     }
     
     // MARK: - Private Methods
     private func makeOAuthTokenRequest(code: String) -> URLRequest? {
         guard let baseURL = URL(string: "https://unsplash.com") else {
-            print("❌ Ошибка в базовом URL Unsplash", #fileID, #function, #line)
+            Logger.error("Ошибка в базовом URL Unsplash")
             return nil
         }
         guard let url = URL(
@@ -59,7 +71,7 @@ final class OAuth2Service {
             + "&&grant_type=authorization_code",
             relativeTo: baseURL
         ) else {
-            print("❌ Ошибка при создании URL для запроса токена", #fileID, #function, #line)
+            Logger.error("Ошибка при создании URL для запроса токена")
             return nil
         }
         var request = URLRequest(url: url)
