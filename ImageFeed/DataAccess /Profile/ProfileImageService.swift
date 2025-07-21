@@ -63,7 +63,7 @@ final class ProfileImageService {
     
     // MARK: - Private Methods
     private func makeProfileImageRequestURL(username: String) -> URLRequest? {
-        guard let baseURL = URL(string: "https://api.unsplash.com") else {
+        guard let baseURL = Constants.defaultBaseURL else {
             Logger.error("Ошибка в базовом URL API Unsplash")
             return nil
         }

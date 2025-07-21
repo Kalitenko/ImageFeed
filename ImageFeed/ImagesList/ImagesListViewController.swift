@@ -58,6 +58,7 @@ final class ImagesListViewController: UIViewController {
     // MARK: - Private Properties
     private let photosName: [String] = Array(0..<20).map{ "\($0)" }
     private let currentDateString = Date().dateTimeString
+    private var imagesListService = ImagesListService.shared
     
 }
 
@@ -103,5 +104,11 @@ extension ImagesListViewController: UITableViewDataSource {
         )
         
         return imageListCell
+    }
+    
+    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath
+    ) {
+        // ... if indexPath.row + 1 == photos.count
+        // ... imagesListService.fetchPhotosNextPage()
     }
 }

@@ -7,7 +7,6 @@ enum ProfileServiceError: Error {
 
 // MARK: - Constants
 private enum ClassConstants {
-    static let url = "https://api.unsplash.com"
     static let path = "/me"
     static let authorizationHeader = "Authorization"
     static let header = "Bearer "
@@ -60,7 +59,7 @@ final class ProfileService {
     
     // MARK: - Private Methods
     private func makeProfileRequest(token: String) -> URLRequest? {
-        guard let baseURL = URL(string: ClassConstants.url) else {
+        guard let baseURL = Constants.defaultBaseURL else {
             Logger.error("Ошибка в базовом URL API Unsplash")
             return nil
         }
