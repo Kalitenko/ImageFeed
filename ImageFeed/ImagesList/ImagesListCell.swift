@@ -1,4 +1,5 @@
 import UIKit
+import Kingfisher
 
 // MARK: - Constants
 private enum ClassConstants {
@@ -11,11 +12,11 @@ private enum Layout {
     static let cellImageTop: CGFloat = 4
     static let cellImageHorizontal: CGFloat = 16
     static let cellImageBottom: CGFloat = 4
-
+    
     static let gradientHeight: CGFloat = 30
-
+    
     static let likeButtonSize: CGFloat = 44
-
+    
     static let dateLabelHorizontalInset: CGFloat = 8
     static let dateLabelBottomInset: CGFloat = 8
 }
@@ -113,13 +114,17 @@ final class ImagesListCell: UITableViewCell {
     }
     
     // MARK: - Public Methods
-    func configure(imageName: String, dateString: String, isLiked: Bool) {
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        cellImage.kf.cancelDownloadTask()
+    }
+    
+    
+    func configure(imageURL url: URL, dateString: String, isLiked: Bool) {
         
-        guard let image = UIImage(named: imageName) else {
-            return
-        }
-        
-        cellImage.image = image
+        cellImage.kf.setImage(with: url,
+                              placeholder: UIImage(resource: .defaultFeedImage))
+        cellImage.kf.indicatorType = .activity
         dateLabel.text = dateString
         let buttonImage = isLiked == true ? UIImage(resource: .isLiked) : UIImage(resource: .isNotLiked)
         likeButton.setImage(buttonImage, for: .normal)

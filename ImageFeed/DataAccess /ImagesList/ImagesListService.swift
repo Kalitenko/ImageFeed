@@ -11,7 +11,7 @@ private enum ClassConstants {
     static let authorizationHeader = "Authorization"
     static let header = "Bearer "
     static let pageParam = "page"
-    static let perPageParam = "per_page"
+    static let perPageParam = "per_page"  
     static let perPageParamValue = 10
 }
 
