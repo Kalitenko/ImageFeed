@@ -48,6 +48,7 @@ final class ImagesListCell: UITableViewCell {
     private lazy var likeButton: UIButton = {
         let button = UIButton(type: .custom)
         button.setImage(UIImage(resource: .isNotLiked), for: .normal)
+        button.addTarget(self, action: #selector(likeButtonClicked), for: .touchUpInside)
         
         return button
     }()
@@ -113,12 +114,14 @@ final class ImagesListCell: UITableViewCell {
         ])
     }
     
+    // MARK: - Public Properties
+    weak var delegate: ImagesListCellDelegate?
+    
     // MARK: - Public Methods
     override func prepareForReuse() {
         super.prepareForReuse()
         cellImage.kf.cancelDownloadTask()
     }
-    
     
     func configure(imageURL url: URL, dateString: String, isLiked: Bool) {
         
@@ -126,7 +129,17 @@ final class ImagesListCell: UITableViewCell {
                               placeholder: UIImage(resource: .defaultFeedImage))
         cellImage.kf.indicatorType = .activity
         dateLabel.text = dateString
-        let buttonImage = isLiked == true ? UIImage(resource: .isLiked) : UIImage(resource: .isNotLiked)
+        setIsLiked(isLiked)
+    }
+    
+    func setIsLiked(_ isLiked: Bool) {
+        let buttonImage = isLiked ? UIImage(resource: .isLiked) : UIImage(resource: .isNotLiked)
         likeButton.setImage(buttonImage, for: .normal)
+    }
+    
+    // MARK: - IB Actions
+    @objc
+    private func likeButtonClicked() {
+        delegate?.imageListCellDidTapLike(self)
     }
 }

@@ -39,7 +39,7 @@ final class ImagesListViewController: UIViewController {
             ) { [weak self] _ in
                 guard let self else { return }
                 self.updateTableViewAnimated()
-        }
+            }
     }
     
     // MARK: - Setup Methods
@@ -78,8 +78,9 @@ final class ImagesListViewController: UIViewController {
     private var photos: [Photo] = []
     private var imagesListServiceObserver: NSObjectProtocol?
     
-    @objc                                                       
-    func updateTableViewAnimated() {
+    // MARK: - Private Methods
+    @objc
+    private func updateTableViewAnimated() {
         let oldCount = photos.count
         let newCount = imagesListService.photos.count
         photos = imagesListService.photos
@@ -140,6 +141,7 @@ extension ImagesListViewController: UITableViewDataSource {
             dateString: photo.createdAt?.dateTimeString ?? "",
             isLiked: photo.isLiked
         )
+        imageListCell.delegate = self
         
         return imageListCell
     }
@@ -148,6 +150,34 @@ extension ImagesListViewController: UITableViewDataSource {
     ) {
         guard indexPath.row + 1 == photos.count else { return }
         imagesListService.fetchPhotosNextPage()
+    }
+    
+}
+
+// MARK: - ImagesListCellDelegate
+extension ImagesListViewController: ImagesListCellDelegate {
+    func imageListCellDidTapLike(_ cell: ImagesListCell) {
+        guard let indexPath = tableView.indexPath(for: cell) else { return }
+        let photo = photos[indexPath.row]
+        
+        UIBlockingProgressHUD.show()
+        imagesListService.changeLike(photoId: photo.id, isLike: !photo.isLiked) { result in
+            switch result {
+            case .success:
+                self.photos = self.imagesListService.photos
+                cell.setIsLiked(self.photos[indexPath.row].isLiked)
+                UIBlockingProgressHUD.dismiss()
+            case .failure:
+                UIBlockingProgressHUD.dismiss()
+                self.showSomethingWentWrongAlert()
+                Logger.error("Не удалось изменить лайк")
+            }
+        }
+    }
+    
+    private func showSomethingWentWrongAlert() {
+        let alertController = UIAlertController.getSomethingWentWrongWithLikesAlert()
+        present(alertController, animated: true)
     }
     
 }
