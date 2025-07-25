@@ -62,9 +62,9 @@ final class ImagesListViewController: UIViewController {
     }
     
     // MARK: - Navigation
-    private func showSingleImageScreen(image: UIImage?) {
+    private func showSingleImageScreen(url: String) {
         let singleImageController = SingleImageViewController()
-        singleImageController.image = image
+        singleImageController.fullSizeImageURL = url
         singleImageController.modalPresentationStyle = .fullScreen
         present(singleImageController, animated: true)
     }
@@ -99,8 +99,8 @@ final class ImagesListViewController: UIViewController {
 // MARK: - UITableViewDelegate
 extension ImagesListViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let image = UIImage(named: photosName[indexPath.row])
-        showSingleImageScreen(image: image)
+        let url = photos[indexPath.row].largeImageURL
+        showSingleImageScreen(url: url)
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {

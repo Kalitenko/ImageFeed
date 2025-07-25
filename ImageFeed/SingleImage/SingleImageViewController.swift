@@ -1,4 +1,5 @@
 import UIKit
+import Kingfisher
 
 private enum Layout {
     static let minimumZoomScale = 0.1
@@ -6,7 +7,7 @@ private enum Layout {
     
     static let sideInset: CGFloat = 8
     static let bottomInset: CGFloat = 17
-
+    
     static let backwardButtonSize: CGFloat = 48
     static let shareButtonSize: CGFloat = 50
 }
@@ -55,10 +56,8 @@ final class SingleImageViewController: UIViewController {
         setupView()
         setupSubViews()
         setupConstraints()
+        setFullSizeImage()
         
-        // MARK: Lifecycle Logic
-        guard let image else { return }
-        setAndRescaleAndCenterImageInScrollView(image: image)
     }
     
     // MARK: - Setup Methods
@@ -103,12 +102,26 @@ final class SingleImageViewController: UIViewController {
     // MARK: - Logic
     
     // MARK: - Public Properties
-    var image: UIImage? {
+    var fullSizeImageURL: String = "" {
+        didSet {
+            guard let url = URL(string: fullSizeImageURL) else {
+                Logger.error("Ошибка в URL полноразмерного изображения")
+                return
+            }
+            imageUrl = url
+        }
+    }
+    
+    // MARK: - Private Properties
+    private var image: UIImage? {
         didSet {
             guard isViewLoaded, let image else { return }
             setAndRescaleAndCenterImageInScrollView(image: image)
         }
     }
+    
+    // MARK: - Public Properties
+    private var imageUrl: URL?
     
     // MARK: - IB Actions
     @objc
@@ -118,7 +131,9 @@ final class SingleImageViewController: UIViewController {
     
     @objc
     private func didTapShareButton(_ sender: UIButton) {
-        guard let image else { return }
+        guard let image = imageView.image else {
+            return
+        }
         let share = UIActivityViewController(
             activityItems: [image],
             applicationActivities: nil
@@ -161,6 +176,28 @@ final class SingleImageViewController: UIViewController {
         imageView.image = image
         imageView.frame.size = image.size
         rescaleAndCenterImageInScrollView(image: image)
+    }
+    
+    private func setFullSizeImage() {
+        UIBlockingProgressHUD.show()
+        imageView.kf.setImage(with: imageUrl) { [weak self] result in
+            UIBlockingProgressHUD.dismiss()
+            
+            guard let self = self else { return }
+            switch result {
+            case .success(let imageResult):
+                self.image = imageResult.image
+            case .failure:
+                self.showError()
+            }
+        }
+    }
+    
+    private func showError() {
+        let alert = UIAlertController.getShowErrorAlert() {
+            self.setFullSizeImage()
+        }
+        present(alert, animated: true)
     }
 }
 
