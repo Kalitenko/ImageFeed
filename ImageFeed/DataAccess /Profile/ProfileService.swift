@@ -88,3 +88,10 @@ final class ProfileService {
         return profile
     }
 }
+
+// MARK: - Logout
+extension ProfileService {
+    func logout() {
+        profile = nil
+    }
+}

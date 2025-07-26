@@ -192,3 +192,11 @@ final class ImagesListService {
         return photo
     }
 }
+
+// MARK: - Logout
+extension ImagesListService {
+    func logout() {
+        photos = []
+        lastLoadedPage = Int.zero
+    }
+}

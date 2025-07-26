@@ -87,4 +87,9 @@ final class ProfileImageService {
     }
 }
 
-
+// MARK: - Logout
+extension ProfileImageService {
+    func logout() {
+        avatarURL = nil
+    }
+}
