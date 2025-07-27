@@ -3,6 +3,7 @@ import Foundation
 enum ImagesListServiceError: Error {
     case invalidRequest
     case profileRequested
+    case missingDate
 }
 
 // MARK: - Constants
@@ -23,6 +24,7 @@ final class ImagesListService {
     
     // MARK: - Static Properties
     static let didChangeNotification = Notification.Name(rawValue: "ImagesListServiceDidChange")
+    static let didEncounterWrongPhotoData = Notification.Name(rawValue: "ImagesListServiceDidEncounterWrongPhotoData")
     
     // MARK: - Initializer
     private init() {}
@@ -176,14 +178,32 @@ final class ImagesListService {
     }
     
     private func mapToPhotos(_ photosData: [PhotoResult]) -> [Photo] {
-        return photosData.map { mapToPhoto($0) }
+        return photosData.compactMap { photoResult in
+            do {
+                return try mapToPhoto(photoResult)
+            } catch {
+                NotificationCenter.default.post(
+                    name: ImagesListService.didEncounterWrongPhotoData,
+                    object: nil,
+                    userInfo: ["id": photoResult.id]
+                )
+                Logger.error("PhotoResult с id: \(photoResult.id) не может быть преобразован в Photo")
+                return nil
+            }
+        }
     }
     
-    private func mapToPhoto(_ photoResult: PhotoResult) -> Photo {
+    private func mapToPhoto(_ photoResult: PhotoResult) throws -> Photo {
+        
+        guard let date = photoResult.createdAt else {
+            Logger.error("Фотография с пропущенной датой")
+            throw ImagesListServiceError.missingDate
+        }
+        
         let photo = Photo(
             id: photoResult.id,
             size: CGSize(width: photoResult.width, height: photoResult.height),
-            createdAt: photoResult.createdAt ?? Date(),
+            createdAt: date,
             welcomeDescription: photoResult.description,
             thumbImageURL: photoResult.urls.thumb,
             largeImageURL: photoResult.urls.full,

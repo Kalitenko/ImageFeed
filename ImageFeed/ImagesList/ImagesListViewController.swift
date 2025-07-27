@@ -32,14 +32,7 @@ final class ImagesListViewController: UIViewController {
         
         imagesListService.fetchPhotosNextPage()
         
-        imagesListServiceObserver = NotificationCenter.default
-            .addObserver(forName: ImagesListService.didChangeNotification,
-                         object: nil,
-                         queue: .main
-            ) { [weak self] _ in
-                guard let self else { return }
-                self.updateTableViewAnimated()
-            }
+        setupObservers()
     }
     
     // MARK: - Setup Methods
@@ -76,10 +69,35 @@ final class ImagesListViewController: UIViewController {
     private let currentDateString = Date().dateTimeString
     private var imagesListService = ImagesListService.shared
     private var photos: [Photo] = []
-    private var imagesListServiceObserver: NSObjectProtocol?
     
     // MARK: - Private Methods
-    @objc
+    private func setupObservers() {
+        setDidChangeNotificationObserver()
+        setDidEncounterWrongPhotoDataObserver()
+    }
+    
+    private func setDidChangeNotificationObserver() {
+        NotificationCenter.default
+            .addObserver(forName: ImagesListService.didChangeNotification,
+                         object: nil,
+                         queue: .main
+            ) { [weak self] _ in
+                guard let self else { return }
+                self.updateTableViewAnimated()
+            }
+    }
+    
+    private func setDidEncounterWrongPhotoDataObserver() {
+        NotificationCenter.default
+            .addObserver(forName: ImagesListService.didEncounterWrongPhotoData,
+                         object: nil,
+                         queue: .main
+            ) { [weak self] _ in
+                guard let self else { return }
+                self.getSomethingWentWrongWithPhotosAlert()
+            }
+    }
+    
     private func updateTableViewAnimated() {
         let oldCount = photos.count
         let newCount = imagesListService.photos.count
@@ -94,6 +112,10 @@ final class ImagesListViewController: UIViewController {
         }
     }
     
+    private func getSomethingWentWrongWithPhotosAlert() {
+        let alertController = UIAlertController.getSomethingWentWrongWithPhotosAlert()
+        present(alertController, animated: true)
+    }
 }
 
 // MARK: - UITableViewDelegate

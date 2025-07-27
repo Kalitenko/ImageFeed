@@ -5,6 +5,7 @@ private enum Alert {
     static let OkActionTitle = "OK"
     static let authMessage = "Не удалось войти в систему"
     static let likeMessage = "Попробуйте еще раз"
+    static let photoMessage = "Сервер передал данные с ошибкой"
     static let loadFullSizeImageErrorMessage = "Что-то пошло не так. Попробовать ещё раз?"
     static let tryAgainActionTitle = "Повторить"
     static let doNotActionTitle = "Не надо"
@@ -34,6 +35,10 @@ extension UIAlertController {
     
     static func getSomethingWentWrongWithLikesAlert() -> UIAlertController {
         return getSomethingWentWrongAlert(with: Alert.likeMessage)
+    }
+    
+    static func getSomethingWentWrongWithPhotosAlert() -> UIAlertController {
+        return getSomethingWentWrongAlert(with: Alert.photoMessage)
     }
     
     static func getShowErrorAlert(tryAgainHandler: (() -> Void)? = nil) -> UIAlertController {
