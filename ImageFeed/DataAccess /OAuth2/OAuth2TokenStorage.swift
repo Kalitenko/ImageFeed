@@ -25,4 +25,10 @@ final class OAuth2TokenStorage {
             storage.set(newValue, forKey: StorageKeys.oAuthToken.rawValue)
         }
     }
+    
+    // MARK: - Public Methods
+    func logout() {
+        storage.removeObject(forKey: StorageKeys.oAuthToken.rawValue)
+    }
+    
 }

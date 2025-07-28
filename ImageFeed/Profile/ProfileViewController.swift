@@ -142,9 +142,14 @@ final class ProfileViewController: UIViewController {
     // MARK: - Private Properties
     private var profileService = ProfileService.shared
     private var storage = OAuth2TokenStorage.shared
+    private var logoutService = ProfileLogoutService.shared
     
     // MARK: - Actions
     @objc func didTapLogoutButton(_ sender: Any) {
+        let alertController = UIAlertController.getLogoutAlert {
+            self.logoutService.logout()
+        }
+        present(alertController, animated: true)
     }
     
     // MARK: - Private Methods

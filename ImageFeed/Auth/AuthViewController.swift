@@ -10,12 +10,6 @@ private enum ClassConstants {
         static let horizontalInset: CGFloat = 16
         static let bottomInset: CGFloat = 90
     }
-    
-    fileprivate enum Alert {
-        static let title = "Что-то пошло не так("
-        static let message = "Не удалось войти в систему"
-        static let actionTitle = "OK"
-    }
 }
 
 final class AuthViewController: UIViewController {
@@ -99,12 +93,7 @@ final class AuthViewController: UIViewController {
     
     // MARK: - Private Methods
     private func showSomethingWentWrongAlert() {
-        let alertController = UIAlertController(
-            title: ClassConstants.Alert.title,
-            message: ClassConstants.Alert.message,
-            preferredStyle: .alert
-        )
-        alertController.addAction(UIAlertAction(title: ClassConstants.Alert.actionTitle, style: .default))
+        let alertController = UIAlertController.getSomethingWentWrongWithAuthAlert()
         present(alertController, animated: true)
     }
 }

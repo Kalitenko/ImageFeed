@@ -1,0 +1,4 @@
+struct UrlsResult: Decodable {
+    let thumb: String
+    let full: String
+}

@@ -1,4 +1,5 @@
 import UIKit
+import Kingfisher
 
 // MARK: - Constants
 private enum ClassConstants {
@@ -11,11 +12,11 @@ private enum Layout {
     static let cellImageTop: CGFloat = 4
     static let cellImageHorizontal: CGFloat = 16
     static let cellImageBottom: CGFloat = 4
-
+    
     static let gradientHeight: CGFloat = 30
-
+    
     static let likeButtonSize: CGFloat = 44
-
+    
     static let dateLabelHorizontalInset: CGFloat = 8
     static let dateLabelBottomInset: CGFloat = 8
 }
@@ -47,6 +48,7 @@ final class ImagesListCell: UITableViewCell {
     private lazy var likeButton: UIButton = {
         let button = UIButton(type: .custom)
         button.setImage(UIImage(resource: .isNotLiked), for: .normal)
+        button.addTarget(self, action: #selector(likeButtonClicked), for: .touchUpInside)
         
         return button
     }()
@@ -112,16 +114,32 @@ final class ImagesListCell: UITableViewCell {
         ])
     }
     
+    // MARK: - Public Properties
+    weak var delegate: ImagesListCellDelegate?
+    
     // MARK: - Public Methods
-    func configure(imageName: String, dateString: String, isLiked: Bool) {
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        cellImage.kf.cancelDownloadTask()
+    }
+    
+    func configure(imageURL url: URL, dateString: String, isLiked: Bool) {
         
-        guard let image = UIImage(named: imageName) else {
-            return
-        }
-        
-        cellImage.image = image
+        cellImage.kf.setImage(with: url,
+                              placeholder: UIImage(resource: .defaultFeedImage))
+        cellImage.kf.indicatorType = .activity
         dateLabel.text = dateString
-        let buttonImage = isLiked == true ? UIImage(resource: .isLiked) : UIImage(resource: .isNotLiked)
+        setIsLiked(isLiked)
+    }
+    
+    func setIsLiked(_ isLiked: Bool) {
+        let buttonImage = isLiked ? UIImage(resource: .isLiked) : UIImage(resource: .isNotLiked)
         likeButton.setImage(buttonImage, for: .normal)
+    }
+    
+    // MARK: - IB Actions
+    @objc
+    private func likeButtonClicked() {
+        delegate?.imageListCellDidTapLike(self)
     }
 }
