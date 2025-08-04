@@ -20,11 +20,13 @@ final class ProfileService {
     // MARK: - Initializer
     private init() {}
     
+    // MARK: - Read-only Properties
+    private(set) var profile: Profile?
+    
     // MARK: - Private Properties
     private let urlSession = URLSession.shared
     private let decoder = SnakeCaseJSONDecoder()
     private var lastTask: URLSessionTask?
-    private(set) var profile: Profile?
     
     // MARK: - Public Methods
     func fetchProfile(_ token: String, completion: @escaping (Result<Profile, Error>) -> Void) {

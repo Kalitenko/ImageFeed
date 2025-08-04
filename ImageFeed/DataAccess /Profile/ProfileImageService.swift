@@ -15,11 +15,13 @@ final class ProfileImageService {
     // MARK: - Initializer
     private init() {}
     
+    // MARK: - Read-only Properties
+    private(set) var avatarURL: String?
+    
     // MARK: - Private Properties
     private let urlSession = URLSession.shared
     private let decoder = SnakeCaseJSONDecoder()
     private var lastTask: URLSessionTask?
-    private(set) var avatarURL: String?
     private let tokenStorage = OAuth2TokenStorage.shared
     
     // MARK: - Public Methods
