@@ -4,6 +4,7 @@ import Kingfisher
 // MARK: - Constants
 private enum ClassConstants {
     static let reuseIdentifier = "ImagesListCell"
+    static let likeButtonAccessibilityIdentifier = "Like"
 }
 
 private enum Layout {
@@ -49,6 +50,7 @@ final class ImagesListCell: UITableViewCell {
         let button = UIButton(type: .custom)
         button.setImage(UIImage(resource: .isNotLiked), for: .normal)
         button.addTarget(self, action: #selector(likeButtonClicked), for: .touchUpInside)
+        button.accessibilityIdentifier = ClassConstants.likeButtonAccessibilityIdentifier
         
         return button
     }()

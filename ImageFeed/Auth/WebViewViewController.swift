@@ -11,11 +11,17 @@ public protocol WebViewViewControllerProtocol: AnyObject {
 
 final class WebViewViewController: UIViewController & WebViewViewControllerProtocol {
     
+    // MARK: - Constants
+    enum Constants {
+        static let webViewAccessibilityIdentifier = "UnsplashWebView"
+    }
+    
     // MARK: - Layout
     
     // MARK: - UI Elements
     private lazy var webView: WKWebView = {
         let webView = WKWebView()
+        webView.accessibilityIdentifier = Constants.webViewAccessibilityIdentifier
         configureBackButton()
         return webView
     }()

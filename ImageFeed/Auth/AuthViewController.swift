@@ -5,6 +5,7 @@ final class AuthViewController: UIViewController {
     // MARK: - Constants
     enum Constants {
         static let loginButtonTitle = "Войти"
+        static let loginButtonAccessibilityIdentifier = "Authenticate"
         static let loginButtonCornerRadius: CGFloat = 16
         
         static let buttonHeight: CGFloat = 48
@@ -32,6 +33,7 @@ final class AuthViewController: UIViewController {
         button.layer.cornerRadius = Constants.loginButtonCornerRadius
         button.layer.masksToBounds = true
         button.addTarget(self, action: #selector(Self.didTapLoginButton), for: .touchUpInside)
+        button.accessibilityIdentifier = Constants.loginButtonAccessibilityIdentifier
         
         return button
     }()

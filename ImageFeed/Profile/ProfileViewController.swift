@@ -23,6 +23,8 @@ final class ProfileViewController: UIViewController & ProfileViewControllerProto
         static let horizontalInset: CGFloat = 16
         static let labelSpacing: CGFloat = 8
         static let logoutButtonSize: CGFloat = 44
+        
+        static let logoutButtonAccessibilityIdentifier = "Logout"
     }
     
     // MARK: - Layout
@@ -70,6 +72,7 @@ final class ProfileViewController: UIViewController & ProfileViewControllerProto
         button.setImage(UIImage(resource: .exitImage), for: UIControl.State.normal)
         button.addTarget(self, action: #selector(Self.didTapLogoutButton), for: .touchUpInside)
         button.tintColor = UIColor(resource: .ypRed)
+        button.accessibilityIdentifier = Layout.logoutButtonAccessibilityIdentifier
         
         return button
     }()

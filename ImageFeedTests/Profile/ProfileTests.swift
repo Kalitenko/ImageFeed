@@ -34,16 +34,4 @@ final class ProfileTests: XCTestCase {
         // then
         XCTAssertEqual(view.updatedAvatarURL?.absoluteString, newAvatarURL)
     }
-    
-    func testPresenterCallsLogout() {
-        //given
-        let presenter = ProfilePresenterSpy()
-        
-        //when
-        presenter.logout()
-        
-        //then
-        XCTAssertTrue(presenter.logoutCalled)
-    }
-    
 }
