@@ -1,7 +1,7 @@
 @testable import ImageFeed
 import XCTest
 
-final class ProfileViewTests: XCTestCase {
+final class ProfileTests: XCTestCase {
     
     func testViewControllerCallsViewDidLoad() {
         //given
