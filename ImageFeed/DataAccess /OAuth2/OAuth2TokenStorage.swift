@@ -1,6 +1,10 @@
 import Foundation
 import SwiftKeychainWrapper
 
+enum StorageKeys: String {
+    case oAuthToken
+}
+
 final class OAuth2TokenStorage {
     
     // MARK: - Shared Instance

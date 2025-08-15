@@ -1,21 +1,31 @@
 import UIKit
 import Kingfisher
 
-private enum Layout {
-    static let avatarCornerRadius: CGFloat = 35
-    
-    static let nameLabelExampleText = "Екатерина Новикова"
-    static let usernameLabelExampleText = "@ekaterina_nov"
-    static let descriptionLabelExampleText = "Hello, world!"
-    
-    static let avatarSize: CGFloat = 70
-    static let topInset: CGFloat = 32
-    static let horizontalInset: CGFloat = 16
-    static let labelSpacing: CGFloat = 8
-    static let logoutButtonSize: CGFloat = 44
+// MARK: - Protocol
+public protocol ProfileViewControllerProtocol: AnyObject {
+    var presenter: ProfilePresenterProtocol? { get set }
+    func updateProfileDetails(profile: Profile)
+    func updateAvatar(url: URL)
 }
 
-final class ProfileViewController: UIViewController {
+final class ProfileViewController: UIViewController & ProfileViewControllerProtocol {
+    
+    // MARK: - Constants
+    private enum Layout {
+        static let avatarCornerRadius: CGFloat = 35
+        
+        static let nameLabelExampleText = "Екатерина Новикова"
+        static let usernameLabelExampleText = "@ekaterina_nov"
+        static let descriptionLabelExampleText = "Hello, world!"
+        
+        static let avatarSize: CGFloat = 70
+        static let topInset: CGFloat = 32
+        static let horizontalInset: CGFloat = 16
+        static let labelSpacing: CGFloat = 8
+        static let logoutButtonSize: CGFloat = 44
+        
+        static let logoutButtonAccessibilityIdentifier = "Logout"
+    }
     
     // MARK: - Layout
     
@@ -62,6 +72,7 @@ final class ProfileViewController: UIViewController {
         button.setImage(UIImage(resource: .exitImage), for: UIControl.State.normal)
         button.addTarget(self, action: #selector(Self.didTapLogoutButton), for: .touchUpInside)
         button.tintColor = UIColor(resource: .ypRed)
+        button.accessibilityIdentifier = Layout.logoutButtonAccessibilityIdentifier
         
         return button
     }()
@@ -75,12 +86,7 @@ final class ProfileViewController: UIViewController {
         setupConstraints()
         
         // MARK: Lifecycle Logic
-        setupProfileInfo()
-        
-        if let avatarURL = ProfileImageService.shared.avatarURL,
-           let url = URL(string: avatarURL) {
-            updateAvatar(url: url)
-        }
+        presenter?.viewDidLoad()
     }
     
     // MARK: - Setup Methods
@@ -126,78 +132,33 @@ final class ProfileViewController: UIViewController {
     // MARK: - Initializers
     override init(nibName: String?, bundle: Bundle?) {
         super.init(nibName: nibName, bundle: bundle)
-        addObserver()
     }
     
     required init?(coder: NSCoder) {
         super.init(coder: coder)
-        addObserver()
     }
     
-    // MARK: - Deinitialization
-    deinit {
-        removeObserver()
-    }
-    
-    // MARK: - Private Properties
-    private var profileService = ProfileService.shared
-    private var storage = OAuth2TokenStorage.shared
-    private var logoutService = ProfileLogoutService.shared
+    // MARK: - Public Properties
+    var presenter: ProfilePresenterProtocol?
     
     // MARK: - Actions
     @objc func didTapLogoutButton(_ sender: Any) {
         let alertController = UIAlertController.getLogoutAlert {
-            self.logoutService.logout()
+            self.presenter?.logout()
         }
         present(alertController, animated: true)
     }
     
-    // MARK: - Private Methods
-    private func setupProfileInfo() {
-        
-        guard let profile = profileService.profile else {
-            Logger.error("Нет информации о профиле")
-            return
-        }
-        
-        updateProfileDetails(profile: profile)
-    }
-    
-    private func updateProfileDetails(profile: Profile) {
+    // MARK: - Public Methods
+    func updateProfileDetails(profile: Profile) {
         nameLabel.text = profile.name
         usernameLabel.text = profile.loginName
         descriptionLabel.text = profile.bio
     }
     
-    private func addObserver() {
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(updateAvatar(notification:)),
-            name: ProfileImageService.didChangeNotification,
-            object: nil)
-    }
-    
-    private func removeObserver() {
-        NotificationCenter.default.removeObserver(
-            self,
-            name: ProfileImageService.didChangeNotification,
-            object: nil)
-    }
-    
-    @objc
-    private func updateAvatar(notification: Notification) {
-        guard
-            isViewLoaded,
-            let userInfo = notification.userInfo,
-            let profileImageURL = userInfo["URL"] as? String,
-            let url = URL(string: profileImageURL)
-        else { return }
-        updateAvatar(url: url)
-        
-    }
-    
-    private func updateAvatar(url: URL) {
+    func updateAvatar(url: URL) {
         avatarImageView.kf.setImage(with: url,
                                     placeholder: UIImage(resource: .defaultAvatarImage))
     }
+    
 }

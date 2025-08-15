@@ -1,18 +1,17 @@
 import UIKit
 
-// MARK: - Constants
-private enum ClassConstants {
-    fileprivate enum Layout {
+final class AuthViewController: UIViewController {
+    
+    // MARK: - Constants
+    enum Constants {
         static let loginButtonTitle = "Войти"
+        static let loginButtonAccessibilityIdentifier = "Authenticate"
         static let loginButtonCornerRadius: CGFloat = 16
         
         static let buttonHeight: CGFloat = 48
         static let horizontalInset: CGFloat = 16
         static let bottomInset: CGFloat = 90
     }
-}
-
-final class AuthViewController: UIViewController {
     
     // MARK: - Layout
     
@@ -30,10 +29,11 @@ final class AuthViewController: UIViewController {
         button.tintColor = UIColor(resource: .ypBlack)
         button.backgroundColor = UIColor(resource: .ypWhite)
         button.titleLabel?.font = UIFont.bold17
-        button.setTitle(ClassConstants.Layout.loginButtonTitle, for: .normal)
-        button.layer.cornerRadius = ClassConstants.Layout.loginButtonCornerRadius
+        button.setTitle(Constants.loginButtonTitle, for: .normal)
+        button.layer.cornerRadius = Constants.loginButtonCornerRadius
         button.layer.masksToBounds = true
         button.addTarget(self, action: #selector(Self.didTapLoginButton), for: .touchUpInside)
+        button.accessibilityIdentifier = Constants.loginButtonAccessibilityIdentifier
         
         return button
     }()
@@ -63,10 +63,10 @@ final class AuthViewController: UIViewController {
             unsplashLogoImageView.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor),
             unsplashLogoImageView.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor),
             
-            loginButton.heightAnchor.constraint(equalToConstant: ClassConstants.Layout.buttonHeight),
-            loginButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: ClassConstants.Layout.horizontalInset),
-            loginButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -ClassConstants.Layout.horizontalInset),
-            loginButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -ClassConstants.Layout.bottomInset)
+            loginButton.heightAnchor.constraint(equalToConstant: Constants.buttonHeight),
+            loginButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: Constants.horizontalInset),
+            loginButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -Constants.horizontalInset),
+            loginButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -Constants.bottomInset)
         ])
     }
     
@@ -80,6 +80,10 @@ final class AuthViewController: UIViewController {
     private func showWebViewScreen() {
         let webViewViewController = WebViewViewController()
         webViewViewController.delegate = self
+        let authHelper = AuthHelper()
+        let webViewPresenter = WebViewPresenter(authHelper: authHelper)
+        webViewViewController.presenter = webViewPresenter
+        webViewPresenter.view = webViewViewController
         navigationController?.pushViewController(webViewViewController, animated: true)
     }
     

@@ -1,18 +1,23 @@
 import UIKit
 import Kingfisher
 
-private enum Layout {
-    static let minimumZoomScale = 0.1
-    static let maximumZoomScale = 1.25
-    
-    static let sideInset: CGFloat = 8
-    static let bottomInset: CGFloat = 17
-    
-    static let backwardButtonSize: CGFloat = 48
-    static let shareButtonSize: CGFloat = 50
-}
-
 final class SingleImageViewController: UIViewController {
+    
+    // MARK: - Constants
+    private enum Constants {
+        static let backwardButtonAccessibilityIdentifier = "Backward"
+    }
+
+    private enum Layout {
+        static let minimumZoomScale = 0.1
+        static let maximumZoomScale = 1.25
+        
+        static let sideInset: CGFloat = 8
+        static let bottomInset: CGFloat = 17
+        
+        static let backwardButtonSize: CGFloat = 48
+        static let shareButtonSize: CGFloat = 50
+    }
     
     // MARK: - Layout
     
@@ -37,6 +42,7 @@ final class SingleImageViewController: UIViewController {
         let button = UIButton(type: .custom)
         button.setImage(UIImage(resource: .backward), for: .normal)
         button.addTarget(self, action: #selector(Self.didTapCloseButton), for: .touchUpInside)
+        button.accessibilityIdentifier = Constants.backwardButtonAccessibilityIdentifier
         
         return button
     }()
