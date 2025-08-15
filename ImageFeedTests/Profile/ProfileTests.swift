@@ -4,34 +4,34 @@ import XCTest
 final class ProfileTests: XCTestCase {
     
     func testViewControllerCallsViewDidLoad() {
-        //given
+        // Given
         let viewController = ProfileViewController()
         let presenter = ProfilePresenterSpy()
         viewController.presenter = presenter
         presenter.view = viewController
         
-        //when
+        // When
         _ = viewController.view
         
-        //then
+        // Then
         XCTAssertTrue(presenter.viewDidLoadCalled)
     }
     
     func testPresenterHandlesAvatarUpdateNotification() {
-        // given
+        // Given
         let presenter = ProfilePresenter()
         let view = ProfileViewControllerSpy()
         presenter.view = view
         let newAvatarURL = "https://avatar.com/avatar.jpg"
         
-        // when
+        // When
         NotificationCenter.default.post(
             name: ProfileImageService.didChangeNotification,
             object: nil,
             userInfo: ["URL": newAvatarURL]
         )
         
-        // then
+        // Then
         XCTAssertEqual(view.updatedAvatarURL?.absoluteString, newAvatarURL)
     }
 }
